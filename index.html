@@ -338,7 +338,7 @@ function App() {
 
   const periodos = useMemo(()=>{
     const s=new Set(); activas.forEach(f=>{if(f.mes&&f.anio) s.add(`${f.mes} ${f.anio}`);});
-    return [...s].sort((a,b)=>{ const [ma,ya]=a.split(' '),(mb,yb)=b.split(' '); return sk(mb,yb)-sk(ma,ya); });
+    return [...s].sort((a,b)=>{ const [ma, ya] = a.split(' '), [mb, yb] = b.split(' '); return sk(mb,yb)-sk(ma,ya); });
   },[activas]);
 
   const getPer = per=>{
