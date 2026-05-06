@@ -44,24 +44,29 @@
     .btn-success { background: var(--sage); color: #fff; }
     .btn-success:hover:not(:disabled) { background: #6a9279; }
     .btn-danger { background: var(--warm-light); color: var(--warm); border: 1.5px solid #f0c4b4; }
+    .btn-mauve { background: var(--mauve); color: #fff; }
+    .btn-mauve:hover:not(:disabled) { background: #8a7798; }
+    .btn-slate { background: var(--slate); color: #fff; }
+    .btn-slate:hover:not(:disabled) { background: #5b7c9d; }
     .card { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow); padding: 24px; }
     .card-title { font-size: 12px; color: var(--text-soft); margin-bottom: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
     .kpi { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow); padding: 20px 22px; }
     .kpi-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
-    .kpi-value { font-family: 'DM Serif Display'; font-size: 26px; color: var(--text); line-height: 1.1; }
+    .kpi-value { font-family: 'DM Serif Display'; font-size: 24px; color: var(--text); line-height: 1.1; }
     .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
     .kpi.slate { border-top: 3px solid var(--slate); }
     .kpi.sage  { border-top: 3px solid var(--sage); }
     .kpi.warm  { border-top: 3px solid var(--warm); }
     .kpi.mauve { border-top: 3px solid var(--mauve); }
+    .kpi.sand  { border-top: 3px solid var(--sand); }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; border: 1.5px solid var(--border); width: fit-content; }
+    .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; border: 1.5px solid var(--border); width: fit-content; flex-wrap: wrap; }
     .tab { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-soft); transition: all 0.15s; border: none; background: none; font-family: 'DM Sans'; }
     .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
     .filters { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
-    .filter-select, .search-input { padding: 8px 13px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); font-family: 'DM Sans'; font-size: 13px; color: var(--text); outline: none; transition: border 0.15s; }
-    .filter-select:focus, .search-input:focus { border-color: var(--slate); }
+    .filter-select, .search-input, .form-input { padding: 8px 13px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); font-family: 'DM Sans'; font-size: 13px; color: var(--text); outline: none; transition: border 0.15s; }
+    .filter-select:focus, .search-input:focus, .form-input:focus { border-color: var(--slate); }
     .search-input { min-width: 220px; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
@@ -74,12 +79,21 @@
     .badge-pagada    { background: var(--sage-light); color: #3a6a4a; }
     .badge-pendiente { background: var(--warm-light); color: #a04a2a; }
     .badge-anulada   { background: #f0f0f0; color: #888; }
+    .badge-tipo-propia      { background: var(--slate-light); color: #2d4d6e; }
+    .badge-tipo-compartida  { background: #fff4d4; color: #8a6a1c; }
+    .badge-tipo-sin-factura { background: var(--mauve-light); color: #5d456a; }
+    .badge-tipo-desestimada { background: #ececec; color: #777; }
     .pending-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); gap: 12px; }
     .pending-item:last-child { border-bottom: none; }
     .pending-name { font-size: 13px; font-weight: 500; }
     .pending-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
     .pending-amount { font-family: 'DM Serif Display'; font-size: 18px; color: var(--warm); white-space: nowrap; }
-    .missing-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--warm-light); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; border: 1px solid #f0c4b4; }
+    .missing-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--warm-light); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; border: 1px solid #f0c4b4; gap: 12px; flex-wrap: wrap; }
+    .missing-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .audit-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; border: 1px solid var(--border); gap: 10px; flex-wrap: wrap; background: var(--surface); }
+    .audit-item.warn { background: var(--warm-light); border-color: #f0c4b4; }
+    .audit-item.ok { background: var(--sage-light); border-color: #c8d8cf; }
+    .audit-item.info { background: var(--slate-light); border-color: #c4d4e4; }
     .chart-box { width: 100%; height: 240px; }
     .comp-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
     .comp-row:last-child { border-bottom: none; }
@@ -100,12 +114,22 @@
     .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--slate); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .error-box { background: var(--warm-light); border: 1.5px solid #f0c4b4; border-radius: var(--radius-sm); padding: 14px 18px; font-size: 13px; color: #8a3a20; margin-bottom: 20px; line-height: 1.5; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .info-box { background: var(--slate-light); border: 1.5px solid #c4d4e4; border-radius: var(--radius-sm); padding: 14px 18px; font-size: 13px; color: #2d4d6e; margin-bottom: 20px; line-height: 1.5; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(44,40,37,0.45); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+    .modal { background: var(--surface); border-radius: var(--radius); padding: 28px; max-width: 480px; width: 100%; box-shadow: var(--shadow-md); }
+    .modal h2 { font-size: 20px; margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--text-soft); margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .form-group label { font-size: 12px; font-weight: 500; color: var(--text-soft); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
     @media (max-width: 900px) {
       .kpis { grid-template-columns: repeat(2,1fr); }
       .grid-2 { grid-template-columns: 1fr; }
       .app { padding: 16px; }
       .login-card { padding: 32px 20px; }
+      .form-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -117,10 +141,12 @@ import { createRoot } from 'react-dom/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { PublicClientApplication } from '@azure/msal-browser';
 
-const CLIENT_ID   = '30703cc0-19f6-4562-98d5-9cc9bb8aa8b1';
-const AUTHORITY   = 'https://login.microsoftonline.com/common'; // compatible con cuentas personales y laborales
-const EXCEL_PATH  = '0 - Trabajo/HONORARIOS GENERALES/00-HONORARIOS.xlsx';
-const SHEET       = 'FACTURAS';
+// ── CONFIG ───────────────────────────────────────────────────────────────────
+const CLIENT_ID  = '30703cc0-19f6-4562-98d5-9cc9bb8aa8b1';
+const AUTHORITY  = 'https://login.microsoftonline.com/common';
+const EXCEL_PATH = '0 - Trabajo/HONORARIOS GENERALES/00-HONORARIOS.xlsx';
+const SHEET      = 'FACTURAS';
+const READ_RANGE = 'A3:N1000';   // soporta hasta 996 facturas. Ampliable.
 
 const msalConfig = {
   auth: { clientId: CLIENT_ID, authority: AUTHORITY, redirectUri: window.location.origin },
@@ -131,12 +157,55 @@ const SCOPES = ['Files.ReadWrite', 'User.Read'];
 const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const MESES_LABEL = {ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'};
 const COLORES = ['#6b8cae','#7aa68a','#9b86a8','#c4a882','#d4856a','#8fb3c8'];
+
+// Tipos de ingreso
+const TIPOS = ['Propia', 'Compartida', 'Sin Factura', 'Desestimada'];
+
+// Mapeo cliente → carpeta + prefijo de PDF + CUIT
 const CLIENTES_RECURRENTES = ['Mattfra Constructora','Coronel Arnold','Pueblo Muñoz','Comuna de Zavalla','Comuna de Acebal'];
 
+const CLIENTES_CARPETAS = {
+  'Comuna de Acebal': {
+    folder: '0 - Trabajo/00_COMUNA DE ACEBAL/0000_Facturación PROPIA',
+    prefijo: 'ACEBAL',
+    cuit: '30-67747357-2',
+  },
+  'Coronel Arnold': {
+    folder: '0 - Trabajo/00_COMUNA DE CORONEL ARNOLD/0000_Facturación PROPIA',
+    prefijo: 'CA',
+    cuit: '30-67396955-7',
+  },
+  'Pueblo Muñoz': {
+    folder: '0 - Trabajo/00_COMUNA DE PUEBLO MUÑOZ/0000_Facturación PROPIA',
+    prefijo: 'PM',
+    cuit: '30-67747999-6',
+  },
+  'Comuna de Zavalla': {
+    folder: '0 - Trabajo/00_COMUNA DE ZAVALLA/0000_Facturación PROPIA',
+    prefijo: 'ZAVALLA',
+    cuit: '30-65412190-3',
+  },
+  'Mattfra Constructora': {
+    folder: '0 - Trabajo/04 - MATTFRA/0000_Facturación PROPIA',
+    prefijo: 'MATTFRA',
+    cuit: '30-71573759-7',
+  },
+  'Consorcio Pasaje Apóstoles 1229': {
+    folder: '0 - Trabajo/06_PERITAJE PODER JUDICIAL/01 - 20260409 _ Consorcio/0000_Facturación PROPIA',
+    prefijo: 'CONSORCIO',
+    cuit: '30-71717532-4',
+  },
+};
+
+// Regex para validar nombre de PDF: PREFIJO_AAAAMMDD_MES AÑO.pdf
+const PDF_NAME_REGEX = /^(ACEBAL|CA|PM|ZAVALLA|MATTFRA|CONSORCIO)_(\d{8})_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC) (\d{4})\.pdf$/i;
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
 const fmt = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n||0);
 const fmtS = n => { if(!n) return '$0'; if(n>=1e6) return `$${(n/1e6).toFixed(1)}M`; if(n>=1e3) return `$${(n/1e3).toFixed(0)}K`; return `$${Math.round(n)}`; };
 const mesIdx = m => MESES.indexOf(String(m).toUpperCase().substring(0,3));
 const sk = (m,y) => (Number(y)||0)*100 + mesIdx(m) + 1;
+const todayDDMMYYYY = () => { const d=new Date(); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; };
 
 const BASE = 'https://graph.microsoft.com/v1.0';
 async function gFetch(token, path, opts={}) {
@@ -163,15 +232,21 @@ function normEstado(v) {
   if (s.startsWith('anu')) return 'Anulada';
   return 'Pendiente';
 }
+function normTipo(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s.startsWith('comp')) return 'Compartida';
+  if (s.startsWith('sin')) return 'Sin Factura';
+  if (s.startsWith('des')) return 'Desestimada';
+  return 'Propia'; // default
+}
+
 async function getFileId(token) {
-  // OneDrive personal: no usa SharePoint/SPO. La ruta debe ir como /root:/carpeta/archivo:
   const d = await gFetch(token, `/me/drive/root:/${encodePath(EXCEL_PATH)}:`);
   return d.id;
 }
 
 async function readSheet(token, fid) {
-  // Lee A3:M200 — headers en fila 3, datos desde fila 4. Trae values + text para fechas/formato moneda.
-  const addr = encodeURIComponent(`${SHEET}!A3:M200`);
+  const addr = encodeURIComponent(`${SHEET}!${READ_RANGE}`);
   const d = await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${encodeURIComponent(SHEET)}/range(address='${addr}')?$select=values,text`);
   return { values: d?.values || [], text: d?.text || [] };
 }
@@ -183,15 +258,40 @@ async function patchCell(token, fid, addr, val) {
   });
 }
 
+async function patchRow(token, fid, rowExcel, valuesArr) {
+  // valuesArr es array de 14 valores (col A-N)
+  const addr = `A${rowExcel}:N${rowExcel}`;
+  const enc = encodeURIComponent(`${SHEET}!${addr}`);
+  await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${encodeURIComponent(SHEET)}/range(address='${enc}')`, {
+    method:'PATCH', body: JSON.stringify({ values:[valuesArr] })
+  });
+}
+
+async function listFolderChildren(token, folderPath) {
+  // Lista hijos de una carpeta. Retorna [] si la carpeta no existe.
+  try {
+    const d = await gFetch(token, `/me/drive/root:/${encodePath(folderPath)}:/children?$top=200&$select=name,id,size,parentReference,webUrl`);
+    return d?.value || [];
+  } catch (e) {
+    if (String(e.message).includes('404') || String(e.message).includes('itemNotFound')) return null;
+    throw e;
+  }
+}
+
+async function renameItem(token, itemId, newName) {
+  await gFetch(token, `/me/drive/items/${itemId}`, {
+    method:'PATCH', body: JSON.stringify({ name: newName })
+  });
+}
+
 function parseRows(range) {
   const rows = range?.values || [];
   const text = range?.text || [];
   if (!rows || rows.length < 2) return [];
-  // rows[0] = headers (fila 3 del Excel); rows[i] i>=1 → fila Excel = i+3
   return rows.slice(1).map((row, i) => {
     const t = text[i+1] || [];
     const rawId = row[0];
-    if (!rawId || isNaN(Number(rawId))) return null; // fila vacía o TOTAL
+    if (!rawId || isNaN(Number(rawId))) return null;
     const rawMonto = row[8];
     const monto = typeof rawMonto === 'number' ? rawMonto : (parseFloat(String(rawMonto||'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.')) || 0);
     return {
@@ -209,6 +309,7 @@ function parseRows(range) {
       fechaPago: excelDateToText(t[10] || row[10]),
       notas:    String(row[11]||'').trim(),
       pdf:      String(row[12]||'').trim(),
+      tipo:     normTipo(row[13]),
     };
   }).filter(Boolean);
 }
@@ -219,8 +320,43 @@ function detectFaltantes(facturas) {
   const msIdx  = hoy.getMonth() === 0 ? 11 : hoy.getMonth() - 1;
   const anio   = hoy.getMonth() === 0 ? hoy.getFullYear()-1 : hoy.getFullYear();
   const mesLbl = MESES[msIdx];
-  const facturadas = new Set(facturas.filter(f=>f.mes===mesLbl&&f.anio===anio&&f.estado!=='Anulada').map(f=>f.cliente));
-  return CLIENTES_RECURRENTES.filter(c=>!facturadas.has(c)).map(c=>({cliente:c,mes:mesLbl,anio}));
+  // Un cliente está "cubierto" si tiene CUALQUIER fila para ese período (cualquier tipo, cualquier estado).
+  const cubiertos = new Set(
+    facturas.filter(f => f.mes === mesLbl && f.anio === anio).map(f => f.cliente)
+  );
+  return CLIENTES_RECURRENTES.filter(c => !cubiertos.has(c)).map(c => ({ cliente:c, mes:mesLbl, anio }));
+}
+
+// Detecta el último ID y la siguiente fila libre
+function nextRowAndId(facturas) {
+  const maxId = facturas.reduce((m, f) => Math.max(m, f.id || 0), 0);
+  const maxRow = facturas.reduce((m, f) => Math.max(m, f.rowExcel || 0), 3);
+  return { id: maxId + 1, row: maxRow + 1 };
+}
+
+// Parsea el nombre del PDF y devuelve datos extraídos o null si no cumple formato
+function parsePDFName(name) {
+  const m = name.match(PDF_NAME_REGEX);
+  if (!m) return null;
+  const [, prefijo, fecha, mes, anio] = m;
+  // fecha es AAAAMMDD
+  const yyyy = fecha.substring(0,4), mm = fecha.substring(4,6), dd = fecha.substring(6,8);
+  return {
+    prefijo: prefijo.toUpperCase(),
+    fechaEmision: `${dd}/${mm}/${yyyy}`,
+    mes: mes.toUpperCase(),
+    anio: Number(anio),
+  };
+}
+
+// Sugiere un nombre correcto si se puede inferir (por carpeta + fecha de subida)
+function sugerirNombre(prefijo, mtimeIso, mes, anio) {
+  // Por defecto usa la fecha de modificación del archivo (no perfecta pero orientativa)
+  const d = mtimeIso ? new Date(mtimeIso) : new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${prefijo}_${yyyy}${mm}${dd}_${mes||'XXX'} ${anio||yyyy}.pdf`;
 }
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
@@ -242,6 +378,26 @@ function Badge({estado}) {
   const cls = estado==='Pagada'?'badge-pagada':estado==='Anulada'?'badge-anulada':'badge-pendiente';
   return React.createElement('span',{className:`badge ${cls}`},estado||'Pendiente');
 }
+function TipoBadge({tipo}) {
+  const map = {
+    'Propia': 'badge-tipo-propia',
+    'Compartida': 'badge-tipo-compartida',
+    'Sin Factura': 'badge-tipo-sin-factura',
+    'Desestimada': 'badge-tipo-desestimada',
+  };
+  return React.createElement('span',{className:`badge ${map[tipo]||'badge-tipo-propia'}`},tipo||'Propia');
+}
+
+// Modal genérico
+function Modal({ title, sub, children, onClose }) {
+  return React.createElement('div',{className:'modal-overlay',onClick:onClose},
+    React.createElement('div',{className:'modal',onClick:e=>e.stopPropagation()},
+      React.createElement('h2',null,title),
+      sub && React.createElement('div',{className:'modal-sub'},sub),
+      children
+    )
+  );
+}
 
 // ── APP ───────────────────────────────────────────────────────────────────────
 function App() {
@@ -253,13 +409,24 @@ function App() {
   const [facturas,setFacturas] = useState([]);
   const [loading,setLoading] = useState(false);
   const [error,setError]     = useState('');
+  const [info,setInfo]       = useState('');
   const [tab,setTab]         = useState('resumen');
   const [fA,setFA] = useState(''); const [fM,setFM] = useState('');
   const [fC,setFC] = useState(''); const [fE,setFE] = useState('');
+  const [fT,setFT] = useState('');
   const [q,setQ]   = useState('');
   const [sCol,setSCol] = useState('id'); const [sDir,setSDir] = useState('desc');
   const [p1,setP1] = useState(''); const [p2,setP2] = useState('');
   const [marking,setMarking] = useState(null);
+  const [appending,setAppending] = useState(false);
+
+  // Modal de "Registrar ingreso"
+  const [ingresoModal,setIngresoModal] = useState(null); // {cliente, mes, anio} o null
+  const [ingresoForm,setIngresoForm] = useState({tipo:'Compartida',monto:'',concepto:'',estado:'Pagada',notas:''});
+
+  // Auditoría de PDFs
+  const [auditData,setAuditData] = useState(null); // { porCliente: { cliente: {pdfs:[], errors:[]} }, scannedAt }
+  const [auditing,setAuditing] = useState(false);
 
   useEffect(()=>{
     msal.initialize().then(()=>{
@@ -301,51 +468,239 @@ function App() {
       const tk = await getToken();
       let id = fid; if(!id){ id = await getFileId(tk); setFid(id); }
       await patchCell(tk,id,`J${f.rowExcel}`,nuevoEstado);
-      if(nuevoEstado==='Pagada') {
-        const hoy = new Date();
-        await patchCell(tk,id,`K${f.rowExcel}`,`${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`);
-      }
-      setFacturas(prev=>prev.map(x=>x.rowExcel===f.rowExcel?{...x,estado:nuevoEstado,fechaPago:nuevoEstado==='Pagada'?`${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`:x.fechaPago}:x));
+      const fechaPagoNueva = nuevoEstado==='Pagada' ? todayDDMMYYYY() : '';
+      await patchCell(tk,id,`K${f.rowExcel}`,fechaPagoNueva);
+      setFacturas(prev=>prev.map(x=>x.rowExcel===f.rowExcel?{...x,estado:nuevoEstado,fechaPago:fechaPagoNueva}:x));
     } catch(e){ setError(e.message); } finally{ setMarking(null); }
   }
 
-  // Derived
-  const activas    = useMemo(()=>facturas.filter(f=>f.estado!=='Anulada'),[facturas]);
-  const pendientes = useMemo(()=>activas.filter(f=>f.estado!=='Pagada'),[activas]);
-  const pagadas    = useMemo(()=>activas.filter(f=>f.estado==='Pagada'),[activas]);
-  const totalF     = useMemo(()=>activas.reduce((s,f)=>s+f.monto,0),[activas]);
-  const totalC     = useMemo(()=>pagadas.reduce((s,f)=>s+f.monto,0),[pagadas]);
-  const totalP     = useMemo(()=>pendientes.reduce((s,f)=>s+f.monto,0),[pendientes]);
-  const clientes   = useMemo(()=>[...new Set(facturas.map(f=>f.cliente).filter(Boolean))].sort(),[facturas]);
-  const anios      = useMemo(()=>[...new Set(facturas.map(f=>String(f.anio)).filter(Boolean))].sort().reverse(),[facturas]);
-  const faltantes  = useMemo(()=>detectFaltantes(facturas),[facturas]);
+  // Append nueva fila al Excel
+  async function appendRow(rowData) {
+    // rowData: {cliente, cuit, mes, anio, fechaEmision (dd/mm/yyyy), nroFactura, concepto, monto, estado, fechaPago, notas, pdf, tipo}
+    setAppending(true);
+    try {
+      const tk = await getToken();
+      let id = fid; if(!id){ id = await getFileId(tk); setFid(id); }
+      const { id: nextId, row: nextRow } = nextRowAndId(facturas);
+      const arr = [
+        nextId,
+        rowData.cliente || '',
+        rowData.cuit || '',
+        rowData.mes || '',
+        rowData.anio || '',
+        rowData.fechaEmision || '',
+        rowData.nroFactura || '',
+        rowData.concepto || '',
+        Number(rowData.monto)||0,
+        rowData.estado || 'Pendiente',
+        rowData.fechaPago || '',
+        rowData.notas || '',
+        rowData.pdf || '',
+        rowData.tipo || 'Propia',
+      ];
+      await patchRow(tk, id, nextRow, arr);
+      // Recargo los datos
+      await load(tk);
+      return nextRow;
+    } finally {
+      setAppending(false);
+    }
+  }
+
+  // Desestimar warning de cliente faltante
+  async function desestimar(faltante) {
+    setError('');
+    try {
+      const cinfo = CLIENTES_CARPETAS[faltante.cliente] || {};
+      await appendRow({
+        cliente: faltante.cliente,
+        cuit: cinfo.cuit || '',
+        mes: faltante.mes,
+        anio: faltante.anio,
+        fechaEmision: '',
+        nroFactura: '',
+        concepto: 'Desestimada — corresponde a colega',
+        monto: 0,
+        estado: 'Anulada',
+        fechaPago: '',
+        notas: 'Sin emisión propia este período',
+        pdf: '',
+        tipo: 'Desestimada',
+      });
+      setInfo(`Desestimado: ${faltante.cliente} — ${MESES_LABEL[faltante.mes]} ${faltante.anio}`);
+    } catch(e) {
+      setError(e.message);
+    }
+  }
+
+  // Abrir modal de "Registrar ingreso" prefilled
+  function abrirIngreso(faltante) {
+    setIngresoModal(faltante);
+    setIngresoForm({tipo:'Compartida',monto:'',concepto:`Ingreso ${MESES_LABEL[faltante.mes]} ${faltante.anio}`,estado:'Pagada',notas:''});
+  }
+
+  async function guardarIngreso() {
+    if (!ingresoModal) return;
+    if (!Number(ingresoForm.monto) || Number(ingresoForm.monto) < 0) {
+      setError('Ingresá un monto válido');
+      return;
+    }
+    setError('');
+    try {
+      const cinfo = CLIENTES_CARPETAS[ingresoModal.cliente] || {};
+      await appendRow({
+        cliente: ingresoModal.cliente,
+        cuit: cinfo.cuit || '',
+        mes: ingresoModal.mes,
+        anio: ingresoModal.anio,
+        fechaEmision: '',
+        nroFactura: '',
+        concepto: ingresoForm.concepto || `Ingreso ${MESES_LABEL[ingresoModal.mes]} ${ingresoModal.anio}`,
+        monto: Number(ingresoForm.monto),
+        estado: ingresoForm.estado,
+        fechaPago: ingresoForm.estado === 'Pagada' ? todayDDMMYYYY() : '',
+        notas: ingresoForm.notas,
+        pdf: '',
+        tipo: ingresoForm.tipo,
+      });
+      setInfo(`Ingreso registrado: ${ingresoModal.cliente} — ${fmt(ingresoForm.monto)}`);
+      setIngresoModal(null);
+    } catch(e) {
+      setError(e.message);
+    }
+  }
+
+  // Auditoría de PDFs en carpetas
+  async function auditarPDFs() {
+    setAuditing(true); setError('');
+    try {
+      const tk = await getToken();
+      const result = { porCliente: {}, scannedAt: new Date().toLocaleString('es-AR'), summary: { ok:0, malNombrados:0, sinRegistrar:0, sinCarpeta:0 } };
+      const pdfsRegistrados = new Set(facturas.map(f => f.pdf).filter(Boolean));
+
+      for (const [cliente, info] of Object.entries(CLIENTES_CARPETAS)) {
+        const items = await listFolderChildren(tk, info.folder);
+        if (items === null) {
+          result.porCliente[cliente] = { error: 'Carpeta no encontrada', folder: info.folder, pdfs: [] };
+          result.summary.sinCarpeta++;
+          continue;
+        }
+        const pdfs = items.filter(it => /\.pdf$/i.test(it.name));
+        const detalle = pdfs.map(pdf => {
+          const parsed = parsePDFName(pdf.name);
+          const enExcel = pdfsRegistrados.has(pdf.name);
+          let status, hint, sugerencia=null;
+          if (!parsed) {
+            status = 'mal-nombrado';
+            sugerencia = sugerirNombre(info.prefijo, pdf.lastModifiedDateTime, '', '');
+            hint = `No cumple formato. Sugerido: ${sugerencia}`;
+            result.summary.malNombrados++;
+          } else if (parsed.prefijo !== info.prefijo) {
+            status = 'mal-nombrado';
+            hint = `Prefijo "${parsed.prefijo}" no coincide con "${info.prefijo}" esperado`;
+            result.summary.malNombrados++;
+          } else if (!enExcel) {
+            status = 'sin-registrar';
+            hint = `PDF no registrado en el Excel`;
+            result.summary.sinRegistrar++;
+          } else {
+            status = 'ok';
+            hint = '';
+            result.summary.ok++;
+          }
+          return { ...pdf, parsed, status, hint, sugerencia, enExcel };
+        });
+        result.porCliente[cliente] = { folder: info.folder, prefijo: info.prefijo, pdfs: detalle };
+      }
+      setAuditData(result);
+      setTab('pdfs');
+    } catch(e) {
+      setError(e.message);
+    } finally {
+      setAuditing(false);
+    }
+  }
+
+  async function renombrarPDF(itemId, nuevoNombre, cliente) {
+    try {
+      const tk = await getToken();
+      await renameItem(tk, itemId, nuevoNombre);
+      setInfo(`Renombrado: ${nuevoNombre}`);
+      // Refrescar auditoría
+      await auditarPDFs();
+    } catch(e) {
+      setError(e.message);
+    }
+  }
+
+  async function registrarPDF(pdf, cliente) {
+    if (!pdf.parsed) return;
+    const cinfo = CLIENTES_CARPETAS[cliente] || {};
+    try {
+      await appendRow({
+        cliente,
+        cuit: cinfo.cuit || '',
+        mes: pdf.parsed.mes,
+        anio: pdf.parsed.anio,
+        fechaEmision: pdf.parsed.fechaEmision,
+        nroFactura: '',
+        concepto: `Honorarios ${MESES_LABEL[pdf.parsed.mes]} ${pdf.parsed.anio}`,
+        monto: 0,
+        estado: 'Pendiente',
+        fechaPago: '',
+        notas: 'Auto-cargado desde PDF — completar monto y N° factura',
+        pdf: pdf.name,
+        tipo: 'Propia',
+      });
+      setInfo(`Registrado: ${pdf.name}. Falta completar monto y N° factura en el Excel.`);
+      // Refrescar auditoría
+      await auditarPDFs();
+    } catch(e) {
+      setError(e.message);
+    }
+  }
+
+  // ── Derived ────────────────────────────────────────────────────────────────
+  const propias    = useMemo(()=>facturas.filter(f=>f.tipo==='Propia' && f.estado!=='Anulada'),[facturas]);
+  const ingresos   = useMemo(()=>facturas.filter(f=>f.tipo!=='Desestimada' && f.estado!=='Anulada'),[facturas]);
+  const pendientes = useMemo(()=>ingresos.filter(f=>f.estado!=='Pagada'),[ingresos]);
+  const pagadas    = useMemo(()=>ingresos.filter(f=>f.estado==='Pagada'),[ingresos]);
+
+  const totalFacturadoPropio = useMemo(()=>propias.reduce((s,f)=>s+f.monto,0),[propias]);
+  const totalIngresos        = useMemo(()=>ingresos.reduce((s,f)=>s+f.monto,0),[ingresos]);
+  const totalCobrado         = useMemo(()=>pagadas.reduce((s,f)=>s+f.monto,0),[pagadas]);
+  const totalPendiente       = useMemo(()=>pendientes.reduce((s,f)=>s+f.monto,0),[pendientes]);
+
+  const clientes  = useMemo(()=>[...new Set(facturas.map(f=>f.cliente).filter(Boolean))].sort(),[facturas]);
+  const anios     = useMemo(()=>[...new Set(facturas.map(f=>String(f.anio)).filter(Boolean))].sort().reverse(),[facturas]);
+  const faltantes = useMemo(()=>detectFaltantes(facturas),[facturas]);
 
   const chartMes = useMemo(()=>{
     const m={};
-    activas.forEach(f=>{
+    ingresos.forEach(f=>{
       const k=`${f.mes} ${f.anio}`;
       if(!m[k]) m[k]={name:k,_s:sk(f.mes,f.anio),cobrado:0,pendiente:0};
       f.estado==='Pagada'?m[k].cobrado+=f.monto:m[k].pendiente+=f.monto;
     });
     return Object.values(m).sort((a,b)=>a._s-b._s).slice(-12);
-  },[activas]);
+  },[ingresos]);
 
   const chartCli = useMemo(()=>{
     const m={};
-    activas.forEach(f=>{m[f.cliente]=(m[f.cliente]||0)+f.monto;});
+    ingresos.forEach(f=>{m[f.cliente]=(m[f.cliente]||0)+f.monto;});
     return Object.entries(m).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total).slice(0,8);
-  },[activas]);
+  },[ingresos]);
 
   const periodos = useMemo(()=>{
-    const s=new Set(); activas.forEach(f=>{if(f.mes&&f.anio) s.add(`${f.mes} ${f.anio}`);});
+    const s=new Set(); ingresos.forEach(f=>{if(f.mes&&f.anio) s.add(`${f.mes} ${f.anio}`);});
     return [...s].sort((a,b)=>{ const [ma, ya] = a.split(' '), [mb, yb] = b.split(' '); return sk(mb,yb)-sk(ma,ya); });
-  },[activas]);
+  },[ingresos]);
 
   const getPer = per=>{
     if(!per) return {};
     const [mes,anio]=per.split(' ');
     const m={};
-    activas.filter(f=>f.mes===mes&&String(f.anio)===anio).forEach(f=>{m[f.cliente]=(m[f.cliente]||0)+f.monto;});
+    ingresos.filter(f=>f.mes===mes&&String(f.anio)===anio).forEach(f=>{m[f.cliente]=(m[f.cliente]||0)+f.monto;});
     return m;
   };
   const compData = useMemo(()=>{
@@ -354,7 +709,7 @@ function App() {
       cliente:k,v1:d1[k]||0,v2:d2[k]||0,
       delta:d1[k]&&d2[k]?Math.round(((d2[k]-d1[k])/d1[k])*100):null
     })).sort((a,b)=>(b.v1+b.v2)-(a.v1+a.v2));
-  },[p1,p2,activas]);
+  },[p1,p2,ingresos]);
   const compMax = useMemo(()=>Math.max(...compData.map(r=>Math.max(r.v1,r.v2)),1),[compData]);
 
   const filtered = useMemo(()=>{
@@ -363,6 +718,7 @@ function App() {
     if(fM) r=r.filter(f=>f.mes===fM);
     if(fC) r=r.filter(f=>f.cliente===fC);
     if(fE) r=r.filter(f=>f.estado===fE);
+    if(fT) r=r.filter(f=>f.tipo===fT);
     if(q){const s=q.toLowerCase(); r=r.filter(f=>f.cliente.toLowerCase().includes(s)||f.nroFactura.toLowerCase().includes(s)||f.concepto.toLowerCase().includes(s));}
     r.sort((a,b)=>{
       let va=a[sCol],vb=b[sCol];
@@ -370,7 +726,7 @@ function App() {
       if(va<vb) return sDir==='asc'?-1:1; if(va>vb) return sDir==='asc'?1:-1; return 0;
     });
     return r;
-  },[facturas,fA,fM,fC,fE,q,sCol,sDir]);
+  },[facturas,fA,fM,fC,fE,fT,q,sCol,sDir]);
 
   function ts(col){if(sCol===col)setSDir(d=>d==='asc'?'desc':'asc');else{setSCol(col);setSDir('asc');}}
 
@@ -396,6 +752,47 @@ function App() {
   const e = (tag,props,...kids)=>React.createElement(tag,props,...kids);
 
   return e('div',{className:'app'},
+
+    // Modal: Registrar ingreso
+    ingresoModal && e(Modal,{
+      title: `Registrar ingreso — ${ingresoModal.cliente}`,
+      sub: `${MESES_LABEL[ingresoModal.mes]} ${ingresoModal.anio} · sin factura propia`,
+      onClose: ()=>setIngresoModal(null),
+    },
+      e('div',{className:'form-group'},
+        e('label',null,'Tipo de ingreso'),
+        e('select',{className:'form-input',value:ingresoForm.tipo,onChange:ev=>setIngresoForm({...ingresoForm,tipo:ev.target.value})},
+          e('option',{value:'Compartida'},'Compartida (factura el colega, te transfiere tu parte)'),
+          e('option',{value:'Sin Factura'},'Sin factura (otro origen)')
+        )
+      ),
+      e('div',{className:'form-row'},
+        e('div',{className:'form-group'},
+          e('label',null,'Monto recibido (ARS)'),
+          e('input',{type:'number',className:'form-input',value:ingresoForm.monto,onChange:ev=>setIngresoForm({...ingresoForm,monto:ev.target.value}),placeholder:'0'})
+        ),
+        e('div',{className:'form-group'},
+          e('label',null,'Estado'),
+          e('select',{className:'form-input',value:ingresoForm.estado,onChange:ev=>setIngresoForm({...ingresoForm,estado:ev.target.value})},
+            e('option',{value:'Pagada'},'Ya cobrado'),
+            e('option',{value:'Pendiente'},'A cobrar')
+          )
+        )
+      ),
+      e('div',{className:'form-group'},
+        e('label',null,'Concepto'),
+        e('input',{type:'text',className:'form-input',value:ingresoForm.concepto,onChange:ev=>setIngresoForm({...ingresoForm,concepto:ev.target.value})})
+      ),
+      e('div',{className:'form-group'},
+        e('label',null,'Notas (opcional)'),
+        e('input',{type:'text',className:'form-input',value:ingresoForm.notas,onChange:ev=>setIngresoForm({...ingresoForm,notas:ev.target.value}),placeholder:'Ej: factura del colega 00001-00012345'})
+      ),
+      e('div',{className:'modal-actions'},
+        e('button',{className:'btn btn-outline',onClick:()=>setIngresoModal(null),disabled:appending},'Cancelar'),
+        e('button',{className:'btn btn-success',onClick:guardarIngreso,disabled:appending},appending?'Guardando...':'Registrar ingreso')
+      )
+    ),
+
     // Header
     e('div',{className:'header'},
       e('div',null,
@@ -408,8 +805,9 @@ function App() {
       )
     ),
 
-    // Error
+    // Error / Info
     error&&e('div',{className:'error-box'},e('span',null,'⚠ ',error),e('button',{style:{cursor:'pointer',background:'none',border:'none',color:'inherit',fontWeight:600,flexShrink:0},onClick:()=>setError('')},'✕')),
+    info&&e('div',{className:'info-box',style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},e('span',null,'✓ ',info),e('button',{style:{cursor:'pointer',background:'none',border:'none',color:'inherit',fontWeight:600},onClick:()=>setInfo('')},'✕')),
 
     loading&&facturas.length===0
       ? e('div',{className:'loading'},e('div',{className:'spinner'}),'Leyendo Excel desde OneDrive...')
@@ -417,21 +815,28 @@ function App() {
 
           // Faltantes
           faltantes.length>0&&e('div',{style:{marginBottom:20}},
-            e('div',{className:'card-title',style:{marginBottom:10,color:'var(--warm)'}},`⚠ Facturas pendientes de emitir — ${MESES_LABEL[faltantes[0]?.mes]||''} ${faltantes[0]?.anio||''}`),
-            faltantes.map(f=>e('div',{key:f.cliente,className:'missing-item'},e('span',null,`📋 ${f.cliente}`),e('span',{style:{fontSize:11,color:'var(--warm)',fontWeight:600}},'Sin factura emitida')))
+            e('div',{className:'card-title',style:{marginBottom:10,color:'var(--warm)'}},`⚠ Pendientes — ${MESES_LABEL[faltantes[0]?.mes]||''} ${faltantes[0]?.anio||''}`),
+            faltantes.map(f=>e('div',{key:f.cliente,className:'missing-item'},
+              e('span',null,'📋 ',f.cliente),
+              e('div',{className:'missing-actions'},
+                e('button',{className:'btn btn-success btn-sm',disabled:appending,onClick:()=>abrirIngreso(f)},'＋ Registrar ingreso'),
+                e('button',{className:'btn btn-outline btn-sm',disabled:appending,onClick:()=>desestimar(f)},'Desestimar')
+              )
+            ))
           ),
 
           // KPIs
           e('div',{className:'kpis'},
-            e(KPI,{label:'Total Facturado',value:fmtS(totalF),sub:`${activas.length} facturas activas`,accent:'slate'}),
-            e(KPI,{label:'Total Cobrado',value:fmtS(totalC),sub:`${pagadas.length} pagadas`,accent:'sage'}),
-            e(KPI,{label:'Pendiente',value:fmtS(totalP),sub:`${pendientes.length} sin cobrar`,accent:'warm'}),
-            e(KPI,{label:'Clientes',value:clientes.length,sub:'activos',accent:'mauve'})
+            e(KPI,{label:'Facturado por mí',value:fmtS(totalFacturadoPropio),sub:`${propias.length} facturas propias`,accent:'slate'}),
+            e(KPI,{label:'Ingresos totales',value:fmtS(totalIngresos),sub:`${ingresos.length} registros`,accent:'mauve'}),
+            e(KPI,{label:'Cobrado',value:fmtS(totalCobrado),sub:`${pagadas.length} cobrados`,accent:'sage'}),
+            e(KPI,{label:'A cobrar',value:fmtS(totalPendiente),sub:`${pendientes.length} pendientes`,accent:'warm'}),
+            e(KPI,{label:'Clientes',value:clientes.length,sub:'activos',accent:'sand'})
           ),
 
           // Tabs
           e('div',{className:'tabs'},
-            [['resumen','Resumen'],['facturas','Todas las facturas'],['comparativa','Comparativa']].map(([id,lbl])=>
+            [['resumen','Resumen'],['facturas','Todos los registros'],['comparativa','Comparativa'],['pdfs','Auditoría PDFs']].map(([id,lbl])=>
               e('button',{key:id,className:`tab ${tab===id?'active':''}`,onClick:()=>setTab(id)},lbl)
             )
           ),
@@ -440,7 +845,7 @@ function App() {
           tab==='resumen'&&e(React.Fragment,null,
             e('div',{className:'grid-2'},
               e('div',{className:'card'},
-                e('div',{className:'card-title'},'Facturado por mes (período del servicio)'),
+                e('div',{className:'card-title'},'Ingresos por mes (período del servicio)'),
                 e('div',{className:'chart-box'},
                   e(ResponsiveContainer,{width:'100%',height:'100%'},
                     e(BarChart,{data:chartMes,margin:{top:4,right:8,left:0,bottom:0}},
@@ -473,15 +878,15 @@ function App() {
             ),
             e('div',{className:'card'},
               e('div',{className:'section-header'},
-                e('div',{className:'card-title',style:{marginBottom:0}},`Pendientes de cobro — ${fmt(totalP)}`)
+                e('div',{className:'card-title',style:{marginBottom:0}},`Pendientes de cobro — ${fmt(totalPendiente)}`)
               ),
               pendientes.length===0
                 ? e('p',{style:{color:'var(--text-muted)',fontSize:13,padding:'12px 0'}},'Sin facturas pendientes 🎉')
                 : pendientes.sort((a,b)=>sk(b.mes,b.anio)-sk(a.mes,a.anio)).map(f=>
                     e('div',{key:f.rowExcel,className:'pending-item'},
                       e('div',null,
-                        e('div',{className:'pending-name'},f.cliente),
-                        e('div',{className:'pending-meta'},`${f.nroFactura||'Sin N°'} · ${MESES_LABEL[f.mes]||f.mes} ${f.anio} · Emitida ${f.fechaEmision}`)
+                        e('div',{className:'pending-name'},f.cliente,' ',e(TipoBadge,{tipo:f.tipo})),
+                        e('div',{className:'pending-meta'},`${f.nroFactura||'Sin N°'} · ${MESES_LABEL[f.mes]||f.mes} ${f.anio} · ${f.fechaEmision?'Emitida '+f.fechaEmision:'Sin fecha emisión'}`)
                       ),
                       e('div',{style:{display:'flex',alignItems:'center',gap:10}},
                         e('span',{className:'pending-amount'},fmt(f.monto)),
@@ -514,13 +919,17 @@ function App() {
                 e('option',{value:'Pagada'},'Pagada'),
                 e('option',{value:'Anulada'},'Anulada')
               ),
+              e('select',{className:'filter-select',value:fT,onChange:ev=>setFT(ev.target.value)},
+                e('option',{value:''},'Todos los tipos'),
+                TIPOS.map(t=>e('option',{key:t,value:t},t))
+              ),
               e('span',{style:{fontSize:12,color:'var(--text-muted)'}},`${filtered.length} registros`)
             ),
             e('div',{className:'table-wrap'},
               e('table',null,
                 e('thead',null,
                   e('tr',null,
-                    [['id','#'],['cliente','Cliente'],['mes','Período'],['fechaEmision','Emisión'],['nroFactura','N° Factura'],['monto','Monto'],['estado','Estado'],['x','']].map(([col,lbl])=>
+                    [['id','#'],['cliente','Cliente'],['mes','Período'],['fechaEmision','Emisión'],['nroFactura','N° Factura'],['monto','Monto'],['tipo','Tipo'],['estado','Estado'],['x','']].map(([col,lbl])=>
                       e('th',{key:col,onClick:col!=='x'?()=>ts(col):undefined},lbl,sCol===col?(sDir==='asc'?' ↑':' ↓'):'')
                     )
                   )
@@ -533,9 +942,10 @@ function App() {
                     e('td',null,f.fechaEmision),
                     e('td',{style:{fontFamily:'monospace',fontSize:12}},f.nroFactura),
                     e('td',{style:{fontFamily:'DM Serif Display',fontSize:15}},fmt(f.monto)),
+                    e('td',null,e(TipoBadge,{tipo:f.tipo})),
                     e('td',null,e(Badge,{estado:f.estado})),
                     e('td',null,
-                      f.estado==='Pendiente'&&e('button',{className:'btn btn-success btn-sm',disabled:marking===f.rowExcel,onClick:()=>marcar(f,'Pagada')},marking===f.rowExcel?'...':'✓ Pagada'),
+                      f.estado==='Pendiente'&&f.tipo!=='Desestimada'&&e('button',{className:'btn btn-success btn-sm',disabled:marking===f.rowExcel,onClick:()=>marcar(f,'Pagada')},marking===f.rowExcel?'...':'✓ Pagada'),
                       f.estado==='Pagada'&&e('button',{className:'btn btn-danger btn-sm',disabled:marking===f.rowExcel,onClick:()=>marcar(f,'Pendiente')},marking===f.rowExcel?'...':'↩ Revertir')
                     )
                   ))
@@ -582,6 +992,55 @@ function App() {
                   ))
                 )
               : e('p',{style:{color:'var(--text-muted)',fontSize:13}},'Seleccioná dos períodos para comparar.')
+          ),
+
+          // ── AUDITORÍA DE PDFs
+          tab==='pdfs'&&e('div',{className:'card'},
+            e('div',{className:'section-header'},
+              e('div',null,
+                e('div',{className:'card-title',style:{marginBottom:4}},'Auditoría de PDFs en carpetas de facturación'),
+                e('div',{style:{fontSize:12,color:'var(--text-muted)'}},auditData ? `Última verificación: ${auditData.scannedAt}` : 'Escaneá las carpetas para revisar nombres y cargas en el Excel.')
+              ),
+              e('button',{className:'btn btn-slate',onClick:auditarPDFs,disabled:auditing},auditing?'↻ Escaneando...':'↻ Escanear ahora')
+            ),
+
+            !auditData && !auditing && e('p',{style:{color:'var(--text-muted)',fontSize:13,padding:'30px 0',textAlign:'center'}},
+              'Hacé clic en "Escanear ahora" para revisar las carpetas 0000_Facturación PROPIA de cada cliente.'
+            ),
+
+            auditData && e(React.Fragment,null,
+              // Resumen
+              e('div',{style:{display:'flex',gap:10,marginBottom:16,flexWrap:'wrap'}},
+                e('span',{className:'badge badge-pagada',style:{fontSize:12,padding:'4px 12px'}},`✓ ${auditData.summary.ok} OK`),
+                auditData.summary.malNombrados>0 && e('span',{className:'badge badge-pendiente',style:{fontSize:12,padding:'4px 12px'}},`⚠ ${auditData.summary.malNombrados} mal nombrados`),
+                auditData.summary.sinRegistrar>0 && e('span',{className:'badge',style:{background:'var(--slate-light)',color:'#2d4d6e',fontSize:12,padding:'4px 12px'}},`◯ ${auditData.summary.sinRegistrar} sin registrar`),
+                auditData.summary.sinCarpeta>0 && e('span',{className:'badge badge-anulada',style:{fontSize:12,padding:'4px 12px'}},`◌ ${auditData.summary.sinCarpeta} sin carpeta`)
+              ),
+
+              Object.entries(auditData.porCliente).map(([cliente,data])=>e('div',{key:cliente,style:{marginBottom:24}},
+                e('h3',{style:{fontSize:16,marginBottom:6,color:'var(--text)'}},cliente),
+                e('div',{style:{fontSize:11,color:'var(--text-muted)',marginBottom:10,fontFamily:'monospace'}},data.folder),
+
+                data.error && e('div',{className:'error-box'},e('span',null,'⚠ ',data.error,'. Verificá que la carpeta exista en OneDrive.')),
+
+                !data.error && data.pdfs.length===0 && e('p',{style:{color:'var(--text-muted)',fontSize:12,fontStyle:'italic'}},'(carpeta vacía o sin PDFs)'),
+
+                !data.error && data.pdfs.map(pdf=>e('div',{key:pdf.id,className:`audit-item ${pdf.status==='ok'?'ok':pdf.status==='mal-nombrado'?'warn':'info'}`},
+                  e('div',{style:{flex:1,minWidth:0}},
+                    e('div',{style:{fontFamily:'monospace',fontSize:12,wordBreak:'break-all'}},pdf.name),
+                    pdf.hint && e('div',{style:{fontSize:11,color:'var(--text-soft)',marginTop:3}},pdf.hint)
+                  ),
+                  e('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+                    pdf.status==='sin-registrar' && pdf.parsed && e('button',{className:'btn btn-success btn-sm',disabled:appending,onClick:()=>registrarPDF(pdf,cliente)},'＋ Registrar en Excel'),
+                    pdf.status==='mal-nombrado' && pdf.sugerencia && e('button',{className:'btn btn-mauve btn-sm',disabled:appending,onClick:()=>{
+                      const nuevo = window.prompt('Nuevo nombre del archivo:', pdf.sugerencia);
+                      if (nuevo && nuevo !== pdf.name) renombrarPDF(pdf.id, nuevo, cliente);
+                    }},'✎ Renombrar'),
+                    pdf.webUrl && e('a',{className:'btn btn-outline btn-sm',href:pdf.webUrl,target:'_blank',rel:'noopener'},'Abrir')
+                  )
+                ))
+              ))
+            )
           )
         )
   );
