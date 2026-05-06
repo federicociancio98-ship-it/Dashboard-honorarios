@@ -18,723 +18,549 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #f5f3ef;
-      --surface: #ffffff;
-      --surface2: #faf9f6;
-      --border: #e8e4dc;
-      --text: #2c2825;
-      --text-soft: #7a6f65;
-      --text-muted: #b0a89e;
-
-      --slate:  #6b8cae;
-      --slate-light: #e8f0f8;
-      --sage:   #7aa68a;
-      --sage-light: #e6f2eb;
-      --mauve:  #9b86a8;
-      --mauve-light: #f0eaf4;
-      --sand:   #c4a882;
-      --sand-light: #faf3ea;
-      --warm:   #d4856a;
-      --warm-light: #fceee9;
-
-      --radius: 16px;
-      --radius-sm: 10px;
+      --bg: #f5f3ef; --surface: #ffffff; --surface2: #faf9f6; --border: #e8e4dc;
+      --text: #2c2825; --text-soft: #7a6f65; --text-muted: #b0a89e;
+      --slate: #6b8cae; --slate-light: #e8f0f8;
+      --sage: #7aa68a;  --sage-light: #e6f2eb;
+      --mauve: #9b86a8; --mauve-light: #f0eaf4;
+      --sand: #c4a882;  --sand-light: #faf3ea;
+      --warm: #d4856a;  --warm-light: #fceee9;
+      --radius: 16px; --radius-sm: 10px;
       --shadow: 0 2px 12px rgba(44,40,37,0.07);
       --shadow-md: 0 4px 24px rgba(44,40,37,0.10);
     }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    h1, h2, h3 { font-family: 'DM Serif Display', serif; font-weight: 400; }
-
-    /* Layout */
-    .app { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
-
-    /* Header */
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
-    .header-title { font-size: 28px; color: var(--text); }
-    .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Sans', sans-serif; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 9px 18px; border-radius: var(--radius-sm);
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-      cursor: pointer; border: none; transition: all 0.18s;
-    }
-    .btn-primary { background: var(--slate); color: #fff; }
-    .btn-primary:hover { background: #5a7a9e; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    h1,h2,h3 { font-family: 'DM Serif Display', serif; font-weight: 400; }
+    .app { max-width: 1300px; margin: 0 auto; padding: 32px 24px; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .header-title { font-size: 28px; }
+    .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; font-family: 'DM Sans'; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: var(--radius-sm); font-family: 'DM Sans'; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.18s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-outline { background: var(--surface); color: var(--text-soft); border: 1.5px solid var(--border); }
-    .btn-outline:hover { border-color: var(--slate); color: var(--slate); }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-outline:hover:not(:disabled) { border-color: var(--slate); color: var(--slate); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
     .btn-success { background: var(--sage); color: #fff; }
-    .btn-success:hover { background: #6a9279; }
-
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1.5px solid var(--border);
-      box-shadow: var(--shadow);
-      padding: 24px;
-    }
-    .card-title { font-size: 15px; color: var(--text-soft); margin-bottom: 16px; font-family: 'DM Sans'; font-weight: 500; letter-spacing: 0.02em; }
-
-    /* KPIs */
+    .btn-success:hover:not(:disabled) { background: #6a9279; }
+    .btn-danger { background: var(--warm-light); color: var(--warm); border: 1.5px solid #f0c4b4; }
+    .card { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow); padding: 24px; }
+    .card-title { font-size: 12px; color: var(--text-soft); margin-bottom: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
     .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .kpi { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow); padding: 20px 22px; }
-    .kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
-    .kpi-value { font-family: 'DM Serif Display'; font-size: 26px; color: var(--text); }
-    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+    .kpi-value { font-family: 'DM Serif Display'; font-size: 26px; color: var(--text); line-height: 1.1; }
+    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
     .kpi.slate { border-top: 3px solid var(--slate); }
     .kpi.sage  { border-top: 3px solid var(--sage); }
     .kpi.warm  { border-top: 3px solid var(--warm); }
     .kpi.mauve { border-top: 3px solid var(--mauve); }
-
-    /* Grid */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-
-    /* Filters */
-    .filters { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-    .filter-select {
-      padding: 8px 14px; border-radius: var(--radius-sm);
-      border: 1.5px solid var(--border); background: var(--surface);
-      font-family: 'DM Sans'; font-size: 13px; color: var(--text);
-      cursor: pointer; outline: none;
-    }
-    .filter-select:focus { border-color: var(--slate); }
-    .search-input {
-      padding: 8px 14px; border-radius: var(--radius-sm);
-      border: 1.5px solid var(--border); background: var(--surface);
-      font-family: 'DM Sans'; font-size: 13px; color: var(--text);
-      outline: none; min-width: 200px;
-    }
-    .search-input:focus { border-color: var(--slate); }
-
-    /* Table */
+    .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; border: 1.5px solid var(--border); width: fit-content; }
+    .tab { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-soft); transition: all 0.15s; border: none; background: none; font-family: 'DM Sans'; }
+    .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+    .filters { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-select, .search-input { padding: 8px 13px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); font-family: 'DM Sans'; font-size: 13px; color: var(--text); outline: none; transition: border 0.15s; }
+    .filter-select:focus, .search-input:focus { border-color: var(--slate); }
+    .search-input { min-width: 220px; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
-    th {
-      text-align: left; font-size: 11px; font-weight: 600;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
-      padding: 10px 14px; border-bottom: 1.5px solid var(--border);
-      cursor: pointer; user-select: none; white-space: nowrap;
-    }
+    th { text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 14px; border-bottom: 1.5px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
     th:hover { color: var(--slate); }
     td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--surface2); }
-
-    /* Badges */
-    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge-pagado { background: var(--sage-light); color: #4a7a5a; }
-    .badge-pendiente { background: var(--warm-light); color: #b05a3a; }
-
-    /* Pending list */
-    .pending-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
-    }
+    .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+    .badge-pagada    { background: var(--sage-light); color: #3a6a4a; }
+    .badge-pendiente { background: var(--warm-light); color: #a04a2a; }
+    .badge-anulada   { background: #f0f0f0; color: #888; }
+    .pending-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); gap: 12px; }
     .pending-item:last-child { border-bottom: none; }
     .pending-name { font-size: 13px; font-weight: 500; }
-    .pending-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .pending-amount { font-family: 'DM Serif Display'; font-size: 18px; color: var(--warm); margin-right: 12px; }
-
-    /* Chart container */
+    .pending-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .pending-amount { font-family: 'DM Serif Display'; font-size: 18px; color: var(--warm); white-space: nowrap; }
+    .missing-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--warm-light); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; border: 1px solid #f0c4b4; }
     .chart-box { width: 100%; height: 240px; }
-
-    /* Comparativa */
-    .comp-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .comp-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
     .comp-row:last-child { border-bottom: none; }
-    .comp-label { font-size: 13px; min-width: 140px; }
-    .comp-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .comp-label { font-size: 13px; min-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .comp-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .comp-bar-wrap { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
     .comp-bar { height: 100%; border-radius: 4px; transition: width 0.4s; }
-    .comp-val { font-size: 12px; color: var(--text-soft); min-width: 80px; text-align: right; }
-    .comp-delta { font-size: 11px; font-weight: 600; min-width: 48px; text-align: right; }
-    .delta-pos { color: var(--sage); }
-    .delta-neg { color: var(--warm); }
-
-    /* Login screen */
-    .login-screen {
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 24px;
-      background: var(--bg);
-    }
-    .login-card {
-      background: var(--surface); border-radius: var(--radius);
-      border: 1.5px solid var(--border); box-shadow: var(--shadow-md);
-      padding: 48px 56px; text-align: center; max-width: 420px;
-    }
+    .comp-vals { min-width: 160px; text-align: right; font-size: 12px; }
+    .comp-delta { font-size: 11px; font-weight: 700; min-width: 48px; text-align: right; }
+    .delta-pos { color: var(--sage); } .delta-neg { color: var(--warm); }
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-card { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow-md); padding: 48px 56px; text-align: center; max-width: 420px; width: 100%; }
     .login-card h1 { font-size: 30px; margin-bottom: 8px; }
-    .login-card p { font-size: 14px; color: var(--text-soft); margin-bottom: 28px; line-height: 1.6; }
-    .ms-btn {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 12px 24px; border-radius: var(--radius-sm);
-      background: #0078d4; color: #fff; font-family: 'DM Sans';
-      font-size: 14px; font-weight: 500; cursor: pointer; border: none;
-      transition: background 0.18s;
-    }
+    .login-card p { font-size: 14px; color: var(--text-soft); margin-bottom: 28px; line-height: 1.7; }
+    .ms-btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 26px; border-radius: var(--radius-sm); background: #0078d4; color: #fff; font-family: 'DM Sans'; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: background 0.18s; }
     .ms-btn:hover { background: #006abc; }
-
-    /* Loading */
     .loading { text-align: center; padding: 60px; color: var(--text-muted); font-size: 14px; }
-    .spinner {
-      width: 32px; height: 32px; border: 3px solid var(--border);
-      border-top-color: var(--slate); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
-    }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--slate); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Error */
-    .error-box {
-      background: var(--warm-light); border: 1.5px solid #f0c4b4;
-      border-radius: var(--radius-sm); padding: 16px 20px;
-      font-size: 13px; color: #8a3a20; margin-bottom: 20px;
-    }
-
-    /* Section header */
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .section-title { font-size: 22px; }
-
-    /* Tabs */
-    .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 24px; border: 1.5px solid var(--border); width: fit-content; }
-    .tab { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-soft); transition: all 0.15s; border: none; background: none; font-family: 'DM Sans'; }
-    .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
-
-    @media (max-width: 768px) {
-      .kpis { grid-template-columns: repeat(2, 1fr); }
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .error-box { background: var(--warm-light); border: 1.5px solid #f0c4b4; border-radius: var(--radius-sm); padding: 14px 18px; font-size: 13px; color: #8a3a20; margin-bottom: 20px; line-height: 1.5; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    @media (max-width: 900px) {
+      .kpis { grid-template-columns: repeat(2,1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
       .app { padding: 16px; }
-      .login-card { padding: 32px 24px; }
+      .login-card { padding: 32px 20px; }
     }
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="module">
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { PublicClientApplication } from '@azure/msal-browser';
 
-// ── CONFIG ────────────────────────────────────────────────────────────────────
-const CLIENT_ID  = '30703cc0-19f6-4562-98d5-9cc9bb8aa8b1';
-const TENANT_ID  = 'bee3aec3-d840-4248-8532-71caa0791ee9';
-const EXCEL_NAME = '00-HONORARIOS.xlsx';
-const SHEET_NAME = 'FACTURAS';
+const CLIENT_ID   = '30703cc0-19f6-4562-98d5-9cc9bb8aa8b1';
+const TENANT_ID   = 'bee3aec3-d840-4248-8532-71caa0791ee9';
+const EXCEL_PATH  = '0 - Trabajo/HONORARIOS GENERALES/00-HONORARIOS.xlsx';
+const SHEET       = 'FACTURAS';
 
 const msalConfig = {
-  auth: {
-    clientId: CLIENT_ID,
-    authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-    redirectUri: window.location.origin,
-  },
+  auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: window.location.origin },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },
 };
-const scopes = ['Files.ReadWrite', 'User.Read', 'offline_access'];
+const SCOPES = ['Files.ReadWrite', 'User.Read', 'offline_access'];
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-const fmt = (n) => new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(n || 0);
-const fmtShort = (n) => {
-  if (!n) return '$0';
-  if (n >= 1_000_000) return `$${(n/1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n/1_000).toFixed(0)}K`;
-  return `$${n}`;
-};
+const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const MESES_LABEL = {ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'};
+const COLORES = ['#6b8cae','#7aa68a','#9b86a8','#c4a882','#d4856a','#8fb3c8'];
+const CLIENTES_RECURRENTES = ['Mattfra Constructora','Coronel Arnold','Pueblo Muñoz','Comuna de Zavalla','Comuna de Acebal'];
 
-const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const COLORES = ['#6b8cae','#7aa68a','#9b86a8','#c4a882','#d4856a','#8fb3c8','#a8c4b0','#b8a0c4'];
+const fmt = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n||0);
+const fmtS = n => { if(!n) return '$0'; if(n>=1e6) return `$${(n/1e6).toFixed(1)}M`; if(n>=1e3) return `$${(n/1e3).toFixed(0)}K`; return `$${Math.round(n)}`; };
+const mesIdx = m => MESES.indexOf(String(m).toUpperCase().substring(0,3));
+const sk = (m,y) => (Number(y)||0)*100 + mesIdx(m) + 1;
 
-// ── GRAPH API ─────────────────────────────────────────────────────────────────
-async function graphGet(token, path) {
-  const r = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!r.ok) throw new Error(`Graph error ${r.status}: ${await r.text()}`);
+const BASE = 'https://graph.microsoft.com/v1.0';
+async function gFetch(token, path, opts={}) {
+  const r = await fetch(`${BASE}${path}`, { ...opts, headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json', ...(opts.headers||{}) } });
+  if (!r.ok) throw new Error(`Graph ${r.status}: ${await r.text()}`);
+  if (r.status === 204) return null;
   return r.json();
 }
 
-async function findExcel(token) {
-  const data = await graphGet(token, `/me/drive/root/search(q='${EXCEL_NAME}')?$select=id,name,parentReference`);
-  const file = data.value?.find(f => f.name === EXCEL_NAME);
-  if (!file) throw new Error(`No se encontró el archivo ${EXCEL_NAME} en OneDrive`);
-  return file.id;
+async function getFileId(token) {
+  const enc = encodeURIComponent(EXCEL_PATH);
+  const d = await gFetch(token, `/me/drive/root:/${enc}`);
+  return d.id;
 }
 
-async function getWorksheetRows(token, fileId) {
-  try {
-    const data = await graphGet(token, `/me/drive/items/${fileId}/workbook/worksheets/${SHEET_NAME}/usedRange?$select=values`);
-    return data.values || [];
-  } catch {
-    return [];
-  }
+async function readSheet(token, fid) {
+  // Lee A3:M200 — headers en fila 3, datos desde fila 4
+  const addr = encodeURIComponent(`${SHEET}!A3:M200`);
+  const d = await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${SHEET}/range(address='${addr}')?$select=values`);
+  return d?.values || [];
 }
 
-async function updateCell(token, fileId, address, value) {
-  await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets/${SHEET_NAME}/range(address='${address}')`, {
-    method: 'PATCH',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [[value]] })
+async function patchCell(token, fid, addr, val) {
+  const enc = encodeURIComponent(`${SHEET}!${addr}`);
+  await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${SHEET}/range(address='${enc}')`, {
+    method:'PATCH', body: JSON.stringify({ values:[[val]] })
   });
 }
 
-function parseRows(raw) {
-  if (!raw || raw.length < 2) return [];
-  const headers = raw[0].map(h => String(h).trim().toLowerCase());
-  const idx = (name) => headers.findIndex(h => h.includes(name));
-  const iFecha   = idx('fecha');
-  const iNum     = idx('factura') !== -1 ? idx('factura') : idx('n°');
-  const iCliente = idx('cliente') !== -1 ? idx('cliente') : idx('comuna');
-  const iMonto   = idx('monto');
-  const iEstado  = idx('estado');
-  const iMes     = idx('mes');
-  const iAnio    = idx('año') !== -1 ? idx('año') : idx('anio');
+function parseRows(rows) {
+  if (!rows || rows.length < 2) return [];
+  // rows[0] = headers (fila 3 del Excel)
+  // rows[i] i>=1 → fila Excel = i+3
+  return rows.slice(1).map((row, i) => {
+    const rawId = row[0];
+    if (!rawId || isNaN(Number(rawId))) return null; // fila vacía o TOTAL
+    const monto = parseFloat(String(row[8]||'').replace(/[^\d.-]/g,'')) || 0;
+    return {
+      rowExcel: i + 4,
+      id:       Number(rawId),
+      cliente:  String(row[1]||'').trim(),
+      cuit:     String(row[2]||'').trim(),
+      mes:      String(row[3]||'').trim().toUpperCase().substring(0,3),
+      anio:     Number(row[4])||0,
+      fechaEmision: String(row[5]||'').trim(),
+      nroFactura:   String(row[6]||'').trim(),
+      concepto:     String(row[7]||'').trim(),
+      monto,
+      estado:   String(row[9]||'Pendiente').trim(),
+      fechaPago:String(row[10]||'').trim(),
+      notas:    String(row[11]||'').trim(),
+      pdf:      String(row[12]||'').trim(),
+    };
+  }).filter(Boolean);
+}
 
-  return raw.slice(1).map((row, i) => ({
-    rowIndex: i + 2,
-    fecha:    row[iFecha]   || '',
-    numero:   row[iNum]     || '',
-    cliente:  row[iCliente] || '',
-    monto:    parseFloat(String(row[iMonto] || '0').replace(/[^0-9.-]/g,'')) || 0,
-    estado:   String(row[iEstado] || 'Pendiente').trim(),
-    mes:      row[iMes]     || '',
-    anio:     row[iAnio]    ? String(row[iAnio]) : '',
-  })).filter(r => r.cliente || r.monto);
+function detectFaltantes(facturas) {
+  const hoy = new Date();
+  // Período del servicio = mes anterior al actual
+  const msIdx  = hoy.getMonth() === 0 ? 11 : hoy.getMonth() - 1;
+  const anio   = hoy.getMonth() === 0 ? hoy.getFullYear()-1 : hoy.getFullYear();
+  const mesLbl = MESES[msIdx];
+  const facturadas = new Set(facturas.filter(f=>f.mes===mesLbl&&f.anio===anio&&f.estado!=='Anulada').map(f=>f.cliente));
+  return CLIENTES_RECURRENTES.filter(c=>!facturadas.has(c)).map(c=>({cliente:c,mes:mesLbl,anio}));
 }
 
 // ── COMPONENTS ────────────────────────────────────────────────────────────────
-function KPI({ label, value, sub, accent }) {
-  return React.createElement('div', { className: `kpi ${accent}` },
-    React.createElement('div', { className: 'kpi-label' }, label),
-    React.createElement('div', { className: 'kpi-value' }, value),
-    sub && React.createElement('div', { className: 'kpi-sub' }, sub)
+function KPI({label,value,sub,accent}) {
+  return React.createElement('div',{className:`kpi ${accent}`},
+    React.createElement('div',{className:'kpi-label'},label),
+    React.createElement('div',{className:'kpi-value'},value),
+    sub&&React.createElement('div',{className:'kpi-sub'},sub)
   );
 }
-
-function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return React.createElement('div', {
-    style: { background: '#fff', border: '1.5px solid #e8e4dc', borderRadius: 10, padding: '10px 14px', fontSize: 13 }
-  },
-    React.createElement('div', { style: { fontWeight: 600, marginBottom: 4 } }, label),
-    payload.map((p, i) => React.createElement('div', { key: i, style: { color: p.color } },
-      `${p.name}: ${fmtShort(p.value)}`
-    ))
+function Tip({active,payload,label}) {
+  if(!active||!payload?.length) return null;
+  return React.createElement('div',{style:{background:'#fff',border:'1.5px solid #e8e4dc',borderRadius:10,padding:'10px 14px',fontSize:13}},
+    React.createElement('div',{style:{fontWeight:600,marginBottom:4}},label),
+    payload.map((p,i)=>React.createElement('div',{key:i,style:{color:p.color}},`${p.name}: ${fmtS(p.value)}`))
   );
 }
+function Badge({estado}) {
+  const cls = estado==='Pagada'?'badge-pagada':estado==='Anulada'?'badge-anulada':'badge-pendiente';
+  return React.createElement('span',{className:`badge ${cls}`},estado||'Pendiente');
+}
 
-// ── MAIN APP ──────────────────────────────────────────────────────────────────
+// ── APP ───────────────────────────────────────────────────────────────────────
 function App() {
-  const [msalInstance] = useState(() => new PublicClientApplication(msalConfig));
-  const [msalReady, setMsalReady] = useState(false);
-  const [account, setAccount] = useState(null);
-  const [token, setToken] = useState(null);
-  const [fileId, setFileId] = useState(null);
-  const [facturas, setFacturas] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [tab, setTab] = useState('resumen');
-  const [filterAnio, setFilterAnio] = useState('');
-  const [filterMes, setFilterMes] = useState('');
-  const [filterCliente, setFilterCliente] = useState('');
-  const [filterEstado, setFilterEstado] = useState('');
-  const [search, setSearch] = useState('');
-  const [sortCol, setSortCol] = useState('fecha');
-  const [sortDir, setSortDir] = useState('desc');
-  const [compPer1, setCompPer1] = useState('');
-  const [compPer2, setCompPer2] = useState('');
-  const [markingId, setMarkingId] = useState(null);
+  const [msal]       = useState(()=>new PublicClientApplication(msalConfig));
+  const [ready,setReady]     = useState(false);
+  const [account,setAccount] = useState(null);
+  const [token,setToken]     = useState(null);
+  const [fid,setFid]         = useState(null);
+  const [facturas,setFacturas] = useState([]);
+  const [loading,setLoading] = useState(false);
+  const [error,setError]     = useState('');
+  const [tab,setTab]         = useState('resumen');
+  const [fA,setFA] = useState(''); const [fM,setFM] = useState('');
+  const [fC,setFC] = useState(''); const [fE,setFE] = useState('');
+  const [q,setQ]   = useState('');
+  const [sCol,setSCol] = useState('id'); const [sDir,setSDir] = useState('desc');
+  const [p1,setP1] = useState(''); const [p2,setP2] = useState('');
+  const [marking,setMarking] = useState(null);
 
-  // Init MSAL
-  useEffect(() => {
-    msalInstance.initialize().then(() => {
-      msalInstance.handleRedirectPromise().then(resp => {
-        const acc = resp?.account || msalInstance.getAllAccounts()[0];
-        if (acc) { setAccount(acc); }
-        setMsalReady(true);
-      }).catch(() => setMsalReady(true));
+  useEffect(()=>{
+    msal.initialize().then(()=>{
+      msal.handleRedirectPromise().then(r=>{
+        const acc = r?.account||msal.getAllAccounts()[0];
+        if(acc) setAccount(acc);
+        setReady(true);
+      }).catch(()=>setReady(true));
     });
-  }, []);
+  },[]);
 
-  // Get token + load data when account set
-  useEffect(() => {
-    if (!account || !msalReady) return;
-    getToken();
-  }, [account, msalReady]);
+  useEffect(()=>{ if(account&&ready) getToken(); },[account,ready]);
+  useEffect(()=>{ if(token) load(token); },[token]);
 
   async function getToken() {
-    try {
-      const resp = await msalInstance.acquireTokenSilent({ scopes, account });
-      setToken(resp.accessToken);
-      return resp.accessToken;
-    } catch {
-      const resp = await msalInstance.acquireTokenPopup({ scopes });
-      setToken(resp.accessToken);
-      setAccount(resp.account);
-      return resp.accessToken;
-    }
+    try { const r=await msal.acquireTokenSilent({scopes:SCOPES,account}); setToken(r.accessToken); return r.accessToken; }
+    catch { const r=await msal.acquireTokenPopup({scopes:SCOPES}); setToken(r.accessToken); setAccount(r.account); return r.accessToken; }
   }
 
-  useEffect(() => {
-    if (token) loadData(token);
-  }, [token]);
-
-  async function loadData(t) {
+  async function load(t) {
     setLoading(true); setError('');
     try {
-      const t2 = t || await getToken();
-      const fid = fileId || await findExcel(t2);
-      if (!fileId) setFileId(fid);
-      const rows = await getWorksheetRows(t2, fid);
+      const tk = t||await getToken();
+      let id = fid; if(!id){id=await getFileId(tk); setFid(id);}
+      const rows = await readSheet(tk,id);
       setFacturas(parseRows(rows));
-    } catch(e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch(e){ setError(e.message); } finally{ setLoading(false); }
   }
 
   async function login() {
-    try {
-      const resp = await msalInstance.loginPopup({ scopes });
-      setAccount(resp.account);
-    } catch(e) { setError(e.message); }
+    setError('');
+    try { const r=await msal.loginPopup({scopes:SCOPES}); setAccount(r.account); }
+    catch(e){ setError(e.message); }
   }
 
-  async function marcarPagado(factura) {
-    setMarkingId(factura.rowIndex);
+  async function marcar(f, nuevoEstado) {
+    setMarking(f.rowExcel);
     try {
-      const t = await getToken();
-      const estadoCol = 'H'; // columna Estado — ajustar si difiere
-      await updateCell(t, fileId, `${estadoCol}${factura.rowIndex}`, 'Pagado');
-      setFacturas(prev => prev.map(f => f.rowIndex === factura.rowIndex ? { ...f, estado: 'Pagado' } : f));
-    } catch(e) { setError(e.message); }
-    finally { setMarkingId(null); }
+      const tk = await getToken();
+      await patchCell(tk,fid,`J${f.rowExcel}`,nuevoEstado);
+      if(nuevoEstado==='Pagada') {
+        const hoy = new Date();
+        await patchCell(tk,fid,`K${f.rowExcel}`,`${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`);
+      }
+      setFacturas(prev=>prev.map(x=>x.rowExcel===f.rowExcel?{...x,estado:nuevoEstado}:x));
+    } catch(e){ setError(e.message); } finally{ setMarking(null); }
   }
 
-  // Derived data
-  const anios = useMemo(() => [...new Set(facturas.map(f => f.anio).filter(Boolean))].sort().reverse(), [facturas]);
-  const clientes = useMemo(() => [...new Set(facturas.map(f => f.cliente).filter(Boolean))].sort(), [facturas]);
+  // Derived
+  const activas    = useMemo(()=>facturas.filter(f=>f.estado!=='Anulada'),[facturas]);
+  const pendientes = useMemo(()=>activas.filter(f=>f.estado!=='Pagada'),[activas]);
+  const pagadas    = useMemo(()=>activas.filter(f=>f.estado==='Pagada'),[activas]);
+  const totalF     = useMemo(()=>activas.reduce((s,f)=>s+f.monto,0),[activas]);
+  const totalC     = useMemo(()=>pagadas.reduce((s,f)=>s+f.monto,0),[pagadas]);
+  const totalP     = useMemo(()=>pendientes.reduce((s,f)=>s+f.monto,0),[pendientes]);
+  const clientes   = useMemo(()=>[...new Set(facturas.map(f=>f.cliente).filter(Boolean))].sort(),[facturas]);
+  const anios      = useMemo(()=>[...new Set(facturas.map(f=>String(f.anio)).filter(Boolean))].sort().reverse(),[facturas]);
+  const faltantes  = useMemo(()=>detectFaltantes(facturas),[facturas]);
 
-  const filtered = useMemo(() => {
-    let r = [...facturas];
-    if (filterAnio) r = r.filter(f => f.anio === filterAnio);
-    if (filterMes) r = r.filter(f => String(f.mes) === filterMes);
-    if (filterCliente) r = r.filter(f => f.cliente === filterCliente);
-    if (filterEstado) r = r.filter(f => f.estado === filterEstado);
-    if (search) {
-      const s = search.toLowerCase();
-      r = r.filter(f => f.cliente.toLowerCase().includes(s) || String(f.numero).includes(s));
-    }
-    r.sort((a,b) => {
-      let va = a[sortCol], vb = b[sortCol];
-      if (typeof va === 'string') va = va.toLowerCase();
-      if (typeof vb === 'string') vb = vb.toLowerCase();
-      if (va < vb) return sortDir === 'asc' ? -1 : 1;
-      if (va > vb) return sortDir === 'asc' ? 1 : -1;
-      return 0;
+  const chartMes = useMemo(()=>{
+    const m={};
+    activas.forEach(f=>{
+      const k=`${f.mes} ${f.anio}`;
+      if(!m[k]) m[k]={name:k,_s:sk(f.mes,f.anio),cobrado:0,pendiente:0};
+      f.estado==='Pagada'?m[k].cobrado+=f.monto:m[k].pendiente+=f.monto;
+    });
+    return Object.values(m).sort((a,b)=>a._s-b._s).slice(-12);
+  },[activas]);
+
+  const chartCli = useMemo(()=>{
+    const m={};
+    activas.forEach(f=>{m[f.cliente]=(m[f.cliente]||0)+f.monto;});
+    return Object.entries(m).map(([name,total])=>({name,total})).sort((a,b)=>b.total-a.total).slice(0,8);
+  },[activas]);
+
+  const periodos = useMemo(()=>{
+    const s=new Set(); activas.forEach(f=>{if(f.mes&&f.anio) s.add(`${f.mes} ${f.anio}`);});
+    return [...s].sort((a,b)=>{ const [ma,ya]=a.split(' '),(mb,yb)=b.split(' '); return sk(mb,yb)-sk(ma,ya); });
+  },[activas]);
+
+  const getPer = per=>{
+    if(!per) return {};
+    const [mes,anio]=per.split(' ');
+    const m={};
+    activas.filter(f=>f.mes===mes&&String(f.anio)===anio).forEach(f=>{m[f.cliente]=(m[f.cliente]||0)+f.monto;});
+    return m;
+  };
+  const compData = useMemo(()=>{
+    const d1=getPer(p1),d2=getPer(p2);
+    return [...new Set([...Object.keys(d1),...Object.keys(d2)])].map(k=>({
+      cliente:k,v1:d1[k]||0,v2:d2[k]||0,
+      delta:d1[k]&&d2[k]?Math.round(((d2[k]-d1[k])/d1[k])*100):null
+    })).sort((a,b)=>(b.v1+b.v2)-(a.v1+a.v2));
+  },[p1,p2,activas]);
+  const compMax = useMemo(()=>Math.max(...compData.map(r=>Math.max(r.v1,r.v2)),1),[compData]);
+
+  const filtered = useMemo(()=>{
+    let r=[...facturas];
+    if(fA) r=r.filter(f=>String(f.anio)===fA);
+    if(fM) r=r.filter(f=>f.mes===fM);
+    if(fC) r=r.filter(f=>f.cliente===fC);
+    if(fE) r=r.filter(f=>f.estado===fE);
+    if(q){const s=q.toLowerCase(); r=r.filter(f=>f.cliente.toLowerCase().includes(s)||f.nroFactura.toLowerCase().includes(s)||f.concepto.toLowerCase().includes(s));}
+    r.sort((a,b)=>{
+      let va=a[sCol],vb=b[sCol];
+      if(sCol==='monto'){va=Number(va);vb=Number(vb);}else{va=String(va||'').toLowerCase();vb=String(vb||'').toLowerCase();}
+      if(va<vb) return sDir==='asc'?-1:1; if(va>vb) return sDir==='asc'?1:-1; return 0;
     });
     return r;
-  }, [facturas, filterAnio, filterMes, filterCliente, filterEstado, search, sortCol, sortDir]);
+  },[facturas,fA,fM,fC,fE,q,sCol,sDir]);
 
-  const pendientes = useMemo(() => facturas.filter(f => f.estado !== 'Pagado'), [facturas]);
-  const totalFacturado = useMemo(() => facturas.reduce((s,f) => s+f.monto, 0), [facturas]);
-  const totalCobrado   = useMemo(() => facturas.filter(f => f.estado === 'Pagado').reduce((s,f) => s+f.monto, 0), [facturas]);
-  const totalPendiente = useMemo(() => pendientes.reduce((s,f) => s+f.monto, 0), [pendientes]);
+  function ts(col){if(sCol===col)setSDir(d=>d==='asc'?'desc':'asc');else{setSCol(col);setSDir('asc');}}
 
-  // Chart data: por mes
-  const chartMes = useMemo(() => {
-    const map = {};
-    facturas.forEach(f => {
-      const key = `${f.anio}-${String(f.mes).padStart(2,'0')}`;
-      if (!map[key]) map[key] = { name: key, cobrado: 0, pendiente: 0 };
-      if (f.estado === 'Pagado') map[key].cobrado += f.monto;
-      else map[key].pendiente += f.monto;
-    });
-    return Object.values(map).sort((a,b) => a.name.localeCompare(b.name)).slice(-12);
-  }, [facturas]);
+  // ── RENDER ─────────────────────────────────────────────────────────────────
+  if(!ready) return React.createElement('div',{className:'login-screen'},React.createElement('div',{className:'spinner',style:{margin:'auto'}}));
 
-  // Chart data: por cliente
-  const chartCliente = useMemo(() => {
-    const map = {};
-    facturas.forEach(f => {
-      if (!map[f.cliente]) map[f.cliente] = 0;
-      map[f.cliente] += f.monto;
-    });
-    return Object.entries(map).map(([name, total]) => ({ name, total })).sort((a,b) => b.total-a.total).slice(0,8);
-  }, [facturas]);
-
-  // Comparativa
-  const periodos = useMemo(() => {
-    const set = new Set();
-    facturas.forEach(f => { if (f.anio && f.mes) set.add(`${f.anio}/${String(f.mes).padStart(2,'0')}`); });
-    return [...set].sort().reverse();
-  }, [facturas]);
-
-  function getPeriodoData(per) {
-    if (!per) return {};
-    const [anio, mes] = per.split('/');
-    const rows = facturas.filter(f => String(f.anio) === anio && String(f.mes).padStart(2,'0') === mes);
-    const map = {};
-    rows.forEach(f => { if (!map[f.cliente]) map[f.cliente] = 0; map[f.cliente] += f.monto; });
-    return map;
-  }
-
-  const compData = useMemo(() => {
-    const d1 = getPeriodoData(compPer1);
-    const d2 = getPeriodoData(compPer2);
-    const keys = [...new Set([...Object.keys(d1), ...Object.keys(d2)])];
-    return keys.map(k => ({
-      cliente: k, v1: d1[k]||0, v2: d2[k]||0,
-      delta: d1[k] && d2[k] ? Math.round(((d2[k]-d1[k])/d1[k])*100) : null
-    })).sort((a,b) => (b.v1+b.v2)-(a.v1+a.v2));
-  }, [compPer1, compPer2, facturas]);
-
-  const compMax = useMemo(() => Math.max(...compData.map(r => Math.max(r.v1, r.v2)), 1), [compData]);
-
-  function toggleSort(col) {
-    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    else { setSortCol(col); setSortDir('asc'); }
-  }
-
-  // ── RENDER ──────────────────────────────────────────────────────────────────
-  if (!msalReady) return React.createElement('div', { className: 'login-screen' },
-    React.createElement('div', { className: 'spinner' })
-  );
-
-  if (!account) return React.createElement('div', { className: 'login-screen' },
-    React.createElement('div', { className: 'login-card' },
-      React.createElement('h1', null, 'Dashboard Honorarios'),
-      React.createElement('p', null, 'Iniciá sesión con tu cuenta Microsoft para acceder a tus facturas desde cualquier dispositivo.'),
-      error && React.createElement('div', { className: 'error-box' }, error),
-      React.createElement('button', { className: 'ms-btn', onClick: login },
-        React.createElement('svg', { width:20, height:20, viewBox:'0 0 21 21', fill:'none' },
-          React.createElement('rect', { x:1, y:1, width:9, height:9, fill:'#f25022' }),
-          React.createElement('rect', { x:11, y:1, width:9, height:9, fill:'#7fba00' }),
-          React.createElement('rect', { x:1, y:11, width:9, height:9, fill:'#00a4ef' }),
-          React.createElement('rect', { x:11, y:11, width:9, height:9, fill:'#ffb900' })
-        ),
-        'Iniciar sesión con Microsoft'
+  if(!account) return React.createElement('div',{className:'login-screen'},
+    React.createElement('div',{className:'login-card'},
+      React.createElement('h1',null,'Dashboard Honorarios'),
+      React.createElement('p',null,'Iniciá sesión con tu cuenta Microsoft para acceder a tus facturas desde cualquier dispositivo.'),
+      error&&React.createElement('div',{className:'error-box'},React.createElement('span',null,error)),
+      React.createElement('button',{className:'ms-btn',onClick:login},
+        React.createElement('svg',{width:20,height:20,viewBox:'0 0 21 21'},
+          React.createElement('rect',{x:1,y:1,width:9,height:9,fill:'#f25022'}),
+          React.createElement('rect',{x:11,y:1,width:9,height:9,fill:'#7fba00'}),
+          React.createElement('rect',{x:1,y:11,width:9,height:9,fill:'#00a4ef'}),
+          React.createElement('rect',{x:11,y:11,width:9,height:9,fill:'#ffb900'})
+        ),'Iniciar sesión con Microsoft'
       )
     )
   );
 
-  return React.createElement('div', { className: 'app' },
+  const e = (tag,props,...kids)=>React.createElement(tag,props,...kids);
+
+  return e('div',{className:'app'},
     // Header
-    React.createElement('div', { className: 'header' },
-      React.createElement('div', null,
-        React.createElement('h1', { className: 'header-title' }, 'Dashboard Honorarios'),
-        React.createElement('div', { className: 'header-sub' }, account.name || account.username)
+    e('div',{className:'header'},
+      e('div',null,
+        e('h1',{className:'header-title'},'Dashboard Honorarios'),
+        e('div',{className:'header-sub'},account.name||account.username)
       ),
-      React.createElement('div', { style: { display:'flex', gap:10 } },
-        React.createElement('button', { className: 'btn btn-outline', onClick: () => loadData(token), disabled: loading },
-          loading ? '↻ Cargando...' : '↻ Actualizar datos'
-        ),
-        React.createElement('button', { className: 'btn btn-outline btn-sm', onClick: () => { msalInstance.logoutPopup(); setAccount(null); setToken(null); } },
-          'Cerrar sesión'
-        )
+      e('div',{style:{display:'flex',gap:10}},
+        e('button',{className:'btn btn-outline',onClick:()=>load(token),disabled:loading},loading?'↻ Cargando...':'↻ Actualizar'),
+        e('button',{className:'btn btn-outline btn-sm',onClick:()=>{msal.logoutPopup();setAccount(null);setToken(null);setFacturas([]);}},'Salir')
       )
     ),
 
-    error && React.createElement('div', { className: 'error-box' }, '⚠ ', error),
+    // Error
+    error&&e('div',{className:'error-box'},e('span',null,'⚠ ',error),e('button',{style:{cursor:'pointer',background:'none',border:'none',color:'inherit',fontWeight:600,flexShrink:0},onClick:()=>setError('')},'✕')),
 
-    loading && facturas.length === 0
-      ? React.createElement('div', { className: 'loading' },
-          React.createElement('div', { className: 'spinner' }),
-          'Leyendo tu Excel de OneDrive...'
-        )
-      : React.createElement(React.Fragment, null,
+    loading&&facturas.length===0
+      ? e('div',{className:'loading'},e('div',{className:'spinner'}),'Leyendo Excel desde OneDrive...')
+      : e(React.Fragment,null,
+
+          // Faltantes
+          faltantes.length>0&&e('div',{style:{marginBottom:20}},
+            e('div',{className:'card-title',style:{marginBottom:10,color:'var(--warm)'}},`⚠ Facturas pendientes de emitir — ${MESES_LABEL[faltantes[0]?.mes]||''} ${faltantes[0]?.anio||''}`),
+            faltantes.map(f=>e('div',{key:f.cliente,className:'missing-item'},e('span',null,`📋 ${f.cliente}`),e('span',{style:{fontSize:11,color:'var(--warm)',fontWeight:600}},'Sin factura emitida')))
+          ),
 
           // KPIs
-          React.createElement('div', { className: 'kpis' },
-            React.createElement(KPI, { label:'Total Facturado', value: fmtShort(totalFacturado), sub: `${facturas.length} facturas`, accent:'slate' }),
-            React.createElement(KPI, { label:'Total Cobrado', value: fmtShort(totalCobrado), sub: `${facturas.filter(f=>f.estado==='Pagado').length} pagadas`, accent:'sage' }),
-            React.createElement(KPI, { label:'Pendiente de Cobro', value: fmtShort(totalPendiente), sub: `${pendientes.length} facturas`, accent:'warm' }),
-            React.createElement(KPI, { label:'Clientes Activos', value: clientes.length, sub: 'comunas / empresas', accent:'mauve' })
+          e('div',{className:'kpis'},
+            e(KPI,{label:'Total Facturado',value:fmtS(totalF),sub:`${activas.length} facturas activas`,accent:'slate'}),
+            e(KPI,{label:'Total Cobrado',value:fmtS(totalC),sub:`${pagadas.length} pagadas`,accent:'sage'}),
+            e(KPI,{label:'Pendiente',value:fmtS(totalP),sub:`${pendientes.length} sin cobrar`,accent:'warm'}),
+            e(KPI,{label:'Clientes',value:clientes.length,sub:'activos',accent:'mauve'})
           ),
 
           // Tabs
-          React.createElement('div', { className: 'tabs' },
-            ['resumen','facturas','comparativa'].map(t2 =>
-              React.createElement('button', { key:t2, className:`tab ${tab===t2?'active':''}`, onClick:()=>setTab(t2) },
-                t2 === 'resumen' ? 'Resumen' : t2 === 'facturas' ? 'Facturas' : 'Comparativa'
-              )
+          e('div',{className:'tabs'},
+            [['resumen','Resumen'],['facturas','Todas las facturas'],['comparativa','Comparativa']].map(([id,lbl])=>
+              e('button',{key:id,className:`tab ${tab===id?'active':''}`,onClick:()=>setTab(id)},lbl)
             )
           ),
 
-          // ── TAB RESUMEN ──
-          tab === 'resumen' && React.createElement(React.Fragment, null,
-            React.createElement('div', { className: 'grid-2' },
-              // Barras por mes
-              React.createElement('div', { className: 'card' },
-                React.createElement('div', { className: 'card-title' }, 'Facturado por mes'),
-                React.createElement('div', { className: 'chart-box' },
-                  React.createElement(ResponsiveContainer, { width:'100%', height:'100%' },
-                    React.createElement(BarChart, { data: chartMes, margin:{top:4,right:8,left:0,bottom:0} },
-                      React.createElement(CartesianGrid, { strokeDasharray:'3 3', stroke:'#e8e4dc' }),
-                      React.createElement(XAxis, { dataKey:'name', tick:{fontSize:11,fill:'#b0a89e'}, tickLine:false, axisLine:false }),
-                      React.createElement(YAxis, { tickFormatter:fmtShort, tick:{fontSize:11,fill:'#b0a89e'}, tickLine:false, axisLine:false }),
-                      React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
-                      React.createElement(Bar, { dataKey:'cobrado', name:'Cobrado', stackId:'a', fill:'#7aa68a', radius:[0,0,0,0] }),
-                      React.createElement(Bar, { dataKey:'pendiente', name:'Pendiente', stackId:'a', fill:'#d4856a', radius:[4,4,0,0] })
+          // ── RESUMEN
+          tab==='resumen'&&e(React.Fragment,null,
+            e('div',{className:'grid-2'},
+              e('div',{className:'card'},
+                e('div',{className:'card-title'},'Facturado por mes (período del servicio)'),
+                e('div',{className:'chart-box'},
+                  e(ResponsiveContainer,{width:'100%',height:'100%'},
+                    e(BarChart,{data:chartMes,margin:{top:4,right:8,left:0,bottom:0}},
+                      e(CartesianGrid,{strokeDasharray:'3 3',stroke:'#e8e4dc'}),
+                      e(XAxis,{dataKey:'name',tick:{fontSize:10,fill:'#b0a89e'},tickLine:false,axisLine:false}),
+                      e(YAxis,{tickFormatter:fmtS,tick:{fontSize:10,fill:'#b0a89e'},tickLine:false,axisLine:false}),
+                      e(Tooltip,{content:e(Tip)}),
+                      e(Bar,{dataKey:'cobrado',name:'Cobrado',stackId:'a',fill:'#7aa68a',radius:[0,0,0,0]}),
+                      e(Bar,{dataKey:'pendiente',name:'Pendiente',stackId:'a',fill:'#d4856a',radius:[4,4,0,0]})
                     )
                   )
                 )
               ),
-
-              // Por cliente
-              React.createElement('div', { className: 'card' },
-                React.createElement('div', { className: 'card-title' }, 'Total por cliente'),
-                React.createElement('div', { className: 'chart-box' },
-                  React.createElement(ResponsiveContainer, { width:'100%', height:'100%' },
-                    React.createElement(BarChart, { data: chartCliente, layout:'vertical', margin:{top:4,right:8,left:0,bottom:0} },
-                      React.createElement(CartesianGrid, { strokeDasharray:'3 3', stroke:'#e8e4dc', horizontal:false }),
-                      React.createElement(XAxis, { type:'number', tickFormatter:fmtShort, tick:{fontSize:11,fill:'#b0a89e'}, tickLine:false, axisLine:false }),
-                      React.createElement(YAxis, { type:'category', dataKey:'name', width:120, tick:{fontSize:11,fill:'#7a6f65'}, tickLine:false, axisLine:false }),
-                      React.createElement(Tooltip, { content: React.createElement(CustomTooltip) }),
-                      React.createElement(Bar, { dataKey:'total', name:'Total', radius:[0,4,4,0] },
-                        chartCliente.map((_, i) => React.createElement(Cell, { key:i, fill: COLORES[i%COLORES.length] }))
+              e('div',{className:'card'},
+                e('div',{className:'card-title'},'Total por cliente'),
+                e('div',{className:'chart-box'},
+                  e(ResponsiveContainer,{width:'100%',height:'100%'},
+                    e(BarChart,{data:chartCli,layout:'vertical',margin:{top:4,right:8,left:0,bottom:0}},
+                      e(CartesianGrid,{strokeDasharray:'3 3',stroke:'#e8e4dc',horizontal:false}),
+                      e(XAxis,{type:'number',tickFormatter:fmtS,tick:{fontSize:10,fill:'#b0a89e'},tickLine:false,axisLine:false}),
+                      e(YAxis,{type:'category',dataKey:'name',width:130,tick:{fontSize:11,fill:'#7a6f65'},tickLine:false,axisLine:false}),
+                      e(Tooltip,{content:e(Tip)}),
+                      e(Bar,{dataKey:'total',name:'Total',radius:[0,4,4,0]},
+                        chartCli.map((_,i)=>e(Cell,{key:i,fill:COLORES[i%COLORES.length]}))
                       )
                     )
                   )
                 )
               )
             ),
-
-            // Pendientes
-            React.createElement('div', { className: 'card' },
-              React.createElement('div', { className: 'section-header' },
-                React.createElement('div', { className: 'card-title', style:{marginBottom:0} }, `Pendientes de cobro — ${fmt(totalPendiente)}`),
+            e('div',{className:'card'},
+              e('div',{className:'section-header'},
+                e('div',{className:'card-title',style:{marginBottom:0}},`Pendientes de cobro — ${fmt(totalP)}`)
               ),
-              pendientes.length === 0
-                ? React.createElement('p', { style:{color:'var(--text-muted)',fontSize:13,padding:'12px 0'} }, 'Sin facturas pendientes 🎉')
-                : pendientes.slice(0,8).map(f =>
-                    React.createElement('div', { key:f.rowIndex, className:'pending-item' },
-                      React.createElement('div', null,
-                        React.createElement('div', { className:'pending-name' }, f.cliente),
-                        React.createElement('div', { className:'pending-meta' }, `Factura ${f.numero} · ${f.mes}/${f.anio}`)
+              pendientes.length===0
+                ? e('p',{style:{color:'var(--text-muted)',fontSize:13,padding:'12px 0'}},'Sin facturas pendientes 🎉')
+                : pendientes.sort((a,b)=>sk(b.mes,b.anio)-sk(a.mes,a.anio)).map(f=>
+                    e('div',{key:f.rowExcel,className:'pending-item'},
+                      e('div',null,
+                        e('div',{className:'pending-name'},f.cliente),
+                        e('div',{className:'pending-meta'},`${f.nroFactura||'Sin N°'} · ${MESES_LABEL[f.mes]||f.mes} ${f.anio} · Emitida ${f.fechaEmision}`)
                       ),
-                      React.createElement('div', { style:{display:'flex',alignItems:'center',gap:8} },
-                        React.createElement('span', { className:'pending-amount' }, fmt(f.monto)),
-                        React.createElement('button', {
-                          className:'btn btn-success btn-sm',
-                          disabled: markingId === f.rowIndex,
-                          onClick: () => marcarPagado(f)
-                        }, markingId === f.rowIndex ? '...' : '✓ Pagado')
+                      e('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                        e('span',{className:'pending-amount'},fmt(f.monto)),
+                        e('button',{className:'btn btn-success btn-sm',disabled:marking===f.rowExcel,onClick:()=>marcar(f,'Pagada')},marking===f.rowExcel?'...':'✓ Marcar pagada')
                       )
                     )
                   )
             )
           ),
 
-          // ── TAB FACTURAS ──
-          tab === 'facturas' && React.createElement('div', { className: 'card' },
-            React.createElement('div', { className: 'filters' },
-              React.createElement('input', { className:'search-input', placeholder:'Buscar cliente o N° factura...', value:search, onChange:e=>setSearch(e.target.value) }),
-              React.createElement('select', { className:'filter-select', value:filterAnio, onChange:e=>setFilterAnio(e.target.value) },
-                React.createElement('option', { value:'' }, 'Todos los años'),
-                anios.map(a => React.createElement('option', { key:a, value:a }, a))
+          // ── FACTURAS
+          tab==='facturas'&&e('div',{className:'card'},
+            e('div',{className:'filters'},
+              e('input',{className:'search-input',placeholder:'Buscar cliente, N° factura, concepto...',value:q,onChange:ev=>setQ(ev.target.value)}),
+              e('select',{className:'filter-select',value:fA,onChange:ev=>setFA(ev.target.value)},
+                e('option',{value:''},'Todos los años'),
+                anios.map(a=>e('option',{key:a,value:a},a))
               ),
-              React.createElement('select', { className:'filter-select', value:filterMes, onChange:e=>setFilterMes(e.target.value) },
-                React.createElement('option', { value:'' }, 'Todos los meses'),
-                MESES.map((m,i) => React.createElement('option', { key:i, value:String(i+1) }, m))
+              e('select',{className:'filter-select',value:fM,onChange:ev=>setFM(ev.target.value)},
+                e('option',{value:''},'Todos los meses'),
+                MESES.map(m=>e('option',{key:m,value:m},MESES_LABEL[m]))
               ),
-              React.createElement('select', { className:'filter-select', value:filterCliente, onChange:e=>setFilterCliente(e.target.value) },
-                React.createElement('option', { value:'' }, 'Todos los clientes'),
-                clientes.map(c => React.createElement('option', { key:c, value:c }, c))
+              e('select',{className:'filter-select',value:fC,onChange:ev=>setFC(ev.target.value)},
+                e('option',{value:''},'Todos los clientes'),
+                clientes.map(c=>e('option',{key:c,value:c},c))
               ),
-              React.createElement('select', { className:'filter-select', value:filterEstado, onChange:e=>setFilterEstado(e.target.value) },
-                React.createElement('option', { value:'' }, 'Todos los estados'),
-                React.createElement('option', { value:'Pagado' }, 'Pagado'),
-                React.createElement('option', { value:'Pendiente' }, 'Pendiente')
+              e('select',{className:'filter-select',value:fE,onChange:ev=>setFE(ev.target.value)},
+                e('option',{value:''},'Todos los estados'),
+                e('option',{value:'Pendiente'},'Pendiente'),
+                e('option',{value:'Pagada'},'Pagada'),
+                e('option',{value:'Anulada'},'Anulada')
               ),
-              React.createElement('span', { style:{fontSize:12,color:'var(--text-muted)'} }, `${filtered.length} facturas`)
+              e('span',{style:{fontSize:12,color:'var(--text-muted)'}},`${filtered.length} registros`)
             ),
-            React.createElement('div', { className:'table-wrap' },
-              React.createElement('table', null,
-                React.createElement('thead', null,
-                  React.createElement('tr', null,
-                    [['numero','N° Factura'],['cliente','Cliente'],['fecha','Fecha'],['mes','Mes'],['monto','Monto'],['estado','Estado'],['','Acción']].map(([col,label]) =>
-                      React.createElement('th', { key:col, onClick: col ? ()=>toggleSort(col) : undefined },
-                        label, sortCol===col ? (sortDir==='asc'?' ↑':' ↓') : ''
-                      )
+            e('div',{className:'table-wrap'},
+              e('table',null,
+                e('thead',null,
+                  e('tr',null,
+                    [['id','#'],['cliente','Cliente'],['mes','Período'],['fechaEmision','Emisión'],['nroFactura','N° Factura'],['monto','Monto'],['estado','Estado'],['x','']].map(([col,lbl])=>
+                      e('th',{key:col,onClick:col!=='x'?()=>ts(col):undefined},lbl,sCol===col?(sDir==='asc'?' ↑':' ↓'):'')
                     )
                   )
                 ),
-                React.createElement('tbody', null,
-                  filtered.map(f =>
-                    React.createElement('tr', { key:f.rowIndex },
-                      React.createElement('td', null, f.numero),
-                      React.createElement('td', null, f.cliente),
-                      React.createElement('td', null, f.fecha),
-                      React.createElement('td', null, `${f.mes}/${f.anio}`),
-                      React.createElement('td', { style:{fontFamily:'DM Serif Display',fontSize:15} }, fmt(f.monto)),
-                      React.createElement('td', null,
-                        React.createElement('span', { className:`badge ${f.estado==='Pagado'?'badge-pagado':'badge-pendiente'}` }, f.estado)
-                      ),
-                      React.createElement('td', null,
-                        f.estado !== 'Pagado' && React.createElement('button', {
-                          className:'btn btn-success btn-sm',
-                          disabled: markingId === f.rowIndex,
-                          onClick: () => marcarPagado(f)
-                        }, markingId === f.rowIndex ? '...' : '✓ Pagado')
-                      )
+                e('tbody',null,
+                  filtered.map(f=>e('tr',{key:f.rowExcel},
+                    e('td',{style:{color:'var(--text-muted)',fontSize:12}},f.id),
+                    e('td',{style:{fontWeight:500}},f.cliente),
+                    e('td',null,`${MESES_LABEL[f.mes]||f.mes} ${f.anio}`),
+                    e('td',null,f.fechaEmision),
+                    e('td',{style:{fontFamily:'monospace',fontSize:12}},f.nroFactura),
+                    e('td',{style:{fontFamily:'DM Serif Display',fontSize:15}},fmt(f.monto)),
+                    e('td',null,e(Badge,{estado:f.estado})),
+                    e('td',null,
+                      f.estado==='Pendiente'&&e('button',{className:'btn btn-success btn-sm',disabled:marking===f.rowExcel,onClick:()=>marcar(f,'Pagada')},marking===f.rowExcel?'...':'✓ Pagada'),
+                      f.estado==='Pagada'&&e('button',{className:'btn btn-danger btn-sm',disabled:marking===f.rowExcel,onClick:()=>marcar(f,'Pendiente')},marking===f.rowExcel?'...':'↩ Revertir')
                     )
-                  )
+                  ))
                 )
               )
             )
           ),
 
-          // ── TAB COMPARATIVA ──
-          tab === 'comparativa' && React.createElement('div', { className: 'card' },
-            React.createElement('div', { className:'filters', style:{marginBottom:24} },
-              React.createElement('label', { style:{fontSize:13,color:'var(--text-soft)'} }, 'Período 1:'),
-              React.createElement('select', { className:'filter-select', value:compPer1, onChange:e=>setCompPer1(e.target.value) },
-                React.createElement('option', { value:'' }, 'Seleccioná período'),
-                periodos.map(p => React.createElement('option', { key:p, value:p }, p))
+          // ── COMPARATIVA
+          tab==='comparativa'&&e('div',{className:'card'},
+            e('div',{className:'filters',style:{marginBottom:24}},
+              e('label',{style:{fontSize:13,color:'var(--text-soft)'}},'Período 1:'),
+              e('select',{className:'filter-select',value:p1,onChange:ev=>setP1(ev.target.value)},
+                e('option',{value:''},'Seleccioná...'),periodos.map(p=>e('option',{key:p,value:p},p))
               ),
-              React.createElement('label', { style:{fontSize:13,color:'var(--text-soft)'} }, 'Período 2:'),
-              React.createElement('select', { className:'filter-select', value:compPer2, onChange:e=>setCompPer2(e.target.value) },
-                React.createElement('option', { value:'' }, 'Seleccioná período'),
-                periodos.map(p => React.createElement('option', { key:p, value:p }, p))
+              e('label',{style:{fontSize:13,color:'var(--text-soft)'}},'Período 2:'),
+              e('select',{className:'filter-select',value:p2,onChange:ev=>setP2(ev.target.value)},
+                e('option',{value:''},'Seleccioná...'),periodos.map(p=>e('option',{key:p,value:p},p))
               )
             ),
-            compPer1 && compPer2
-              ? React.createElement('div', null,
-                  React.createElement('div', { style:{display:'grid',gridTemplateColumns:'140px 1fr 1fr',gap:'0 16px',marginBottom:8} },
-                    React.createElement('span', { style:{fontSize:11,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.05em'} }, 'Cliente'),
-                    React.createElement('span', { style:{fontSize:11,color:'var(--slate)',textTransform:'uppercase',letterSpacing:'0.05em',textAlign:'right'} }, compPer1),
-                    React.createElement('span', { style:{fontSize:11,color:'var(--mauve)',textTransform:'uppercase',letterSpacing:'0.05em',textAlign:'right'} }, compPer2)
+            p1&&p2
+              ? e('div',null,
+                  e('div',{style:{display:'grid',gridTemplateColumns:'150px 1fr 180px 56px',gap:'0 16px',marginBottom:10,paddingBottom:8,borderBottom:'1.5px solid var(--border)'}},
+                    e('span',{style:{fontSize:11,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.05em'}},'Cliente'),
+                    e('span',null),
+                    e('span',{style:{fontSize:11,textAlign:'right'}},
+                      e('span',{style:{color:'var(--slate)'}},p1),' vs ',e('span',{style:{color:'var(--mauve)'}},p2)
+                    ),
+                    e('span',{style:{fontSize:11,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.05em',textAlign:'right'}},'Δ')
                   ),
-                  compData.map(row =>
-                    React.createElement('div', { key:row.cliente, className:'comp-row' },
-                      React.createElement('div', { className:'comp-label' }, row.cliente),
-                      React.createElement('div', { style:{flex:1,display:'flex',flexDirection:'column',gap:4} },
-                        React.createElement('div', { className:'comp-bar-wrap' },
-                          React.createElement('div', { className:'comp-bar', style:{width:`${(row.v1/compMax)*100}%`,background:'var(--slate)'} })
-                        ),
-                        React.createElement('div', { className:'comp-bar-wrap' },
-                          React.createElement('div', { className:'comp-bar', style:{width:`${(row.v2/compMax)*100}%`,background:'var(--mauve)'} })
-                        )
-                      ),
-                      React.createElement('div', { style:{textAlign:'right',minWidth:160} },
-                        React.createElement('div', { style:{fontSize:12,color:'var(--slate)'} }, fmt(row.v1)),
-                        React.createElement('div', { style:{fontSize:12,color:'var(--mauve)'} }, fmt(row.v2))
-                      ),
-                      row.delta !== null && React.createElement('div', { className:`comp-delta ${row.delta>=0?'delta-pos':'delta-neg'}` },
-                        `${row.delta>=0?'+':''}${row.delta}%`
-                      )
-                    )
-                  )
+                  compData.map(row=>e('div',{key:row.cliente,className:'comp-row'},
+                    e('div',{className:'comp-label'},row.cliente),
+                    e('div',{className:'comp-bars'},
+                      e('div',{className:'comp-bar-wrap'},e('div',{className:'comp-bar',style:{width:`${(row.v1/compMax)*100}%`,background:'var(--slate)'}})),
+                      e('div',{className:'comp-bar-wrap'},e('div',{className:'comp-bar',style:{width:`${(row.v2/compMax)*100}%`,background:'var(--mauve)'}}))
+                    ),
+                    e('div',{className:'comp-vals'},
+                      e('div',{style:{color:'var(--slate)'}},fmt(row.v1)),
+                      e('div',{style:{color:'var(--mauve)'}},fmt(row.v2))
+                    ),
+                    row.delta!==null
+                      ? e('div',{className:`comp-delta ${row.delta>=0?'delta-pos':'delta-neg'}`},`${row.delta>=0?'+':''}${row.delta}%`)
+                      : e('div',{className:'comp-delta',style:{color:'var(--text-muted)'}},'—')
+                  ))
                 )
-              : React.createElement('p', { style:{color:'var(--text-muted)',fontSize:13} }, 'Seleccioná dos períodos para comparar.')
+              : e('p',{style:{color:'var(--text-muted)',fontSize:13}},'Seleccioná dos períodos para comparar.')
           )
         )
   );
