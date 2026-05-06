@@ -118,15 +118,15 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { PublicClientApplication } from '@azure/msal-browser';
 
 const CLIENT_ID   = '30703cc0-19f6-4562-98d5-9cc9bb8aa8b1';
-const TENANT_ID   = 'bee3aec3-d840-4248-8532-71caa0791ee9';
+const AUTHORITY   = 'https://login.microsoftonline.com/common'; // compatible con cuentas personales y laborales
 const EXCEL_PATH  = '0 - Trabajo/HONORARIOS GENERALES/00-HONORARIOS.xlsx';
 const SHEET       = 'FACTURAS';
 
 const msalConfig = {
-  auth: { clientId: CLIENT_ID, authority: `https://login.microsoftonline.com/${TENANT_ID}`, redirectUri: window.location.origin },
+  auth: { clientId: CLIENT_ID, authority: AUTHORITY, redirectUri: window.location.origin },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false },
 };
-const SCOPES = ['Files.ReadWrite', 'User.Read', 'offline_access'];
+const SCOPES = ['Files.ReadWrite', 'User.Read'];
 
 const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const MESES_LABEL = {ENE:'Enero',FEB:'Febrero',MAR:'Marzo',ABR:'Abril',MAY:'Mayo',JUN:'Junio',JUL:'Julio',AGO:'Agosto',SEP:'Septiembre',OCT:'Octubre',NOV:'Noviembre',DIC:'Diciembre'};
@@ -146,34 +146,54 @@ async function gFetch(token, path, opts={}) {
   return r.json();
 }
 
+function encodePath(path) {
+  return path.split('/').map(part => encodeURIComponent(part)).join('/');
+}
+function excelDateToText(v) {
+  if (v === null || v === undefined || v === '') return '';
+  if (typeof v === 'number') {
+    const d = new Date(Math.round((v - 25569) * 86400 * 1000));
+    if (!isNaN(d)) return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`;
+  }
+  return String(v).trim();
+}
+function normEstado(v) {
+  const s = String(v || 'Pendiente').trim().toLowerCase();
+  if (s.startsWith('pag')) return 'Pagada';
+  if (s.startsWith('anu')) return 'Anulada';
+  return 'Pendiente';
+}
 async function getFileId(token) {
-  const enc = encodeURIComponent(EXCEL_PATH);
-  const d = await gFetch(token, `/me/drive/root:/${enc}`);
+  // OneDrive personal: no usa SharePoint/SPO. La ruta debe ir como /root:/carpeta/archivo:
+  const d = await gFetch(token, `/me/drive/root:/${encodePath(EXCEL_PATH)}:`);
   return d.id;
 }
 
 async function readSheet(token, fid) {
-  // Lee A3:M200 — headers en fila 3, datos desde fila 4
+  // Lee A3:M200 — headers en fila 3, datos desde fila 4. Trae values + text para fechas/formato moneda.
   const addr = encodeURIComponent(`${SHEET}!A3:M200`);
-  const d = await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${SHEET}/range(address='${addr}')?$select=values`);
-  return d?.values || [];
+  const d = await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${encodeURIComponent(SHEET)}/range(address='${addr}')?$select=values,text`);
+  return { values: d?.values || [], text: d?.text || [] };
 }
 
 async function patchCell(token, fid, addr, val) {
   const enc = encodeURIComponent(`${SHEET}!${addr}`);
-  await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${SHEET}/range(address='${enc}')`, {
+  await gFetch(token, `/me/drive/items/${fid}/workbook/worksheets/${encodeURIComponent(SHEET)}/range(address='${enc}')`, {
     method:'PATCH', body: JSON.stringify({ values:[[val]] })
   });
 }
 
-function parseRows(rows) {
+function parseRows(range) {
+  const rows = range?.values || [];
+  const text = range?.text || [];
   if (!rows || rows.length < 2) return [];
-  // rows[0] = headers (fila 3 del Excel)
-  // rows[i] i>=1 → fila Excel = i+3
+  // rows[0] = headers (fila 3 del Excel); rows[i] i>=1 → fila Excel = i+3
   return rows.slice(1).map((row, i) => {
+    const t = text[i+1] || [];
     const rawId = row[0];
     if (!rawId || isNaN(Number(rawId))) return null; // fila vacía o TOTAL
-    const monto = parseFloat(String(row[8]||'').replace(/[^\d.-]/g,'')) || 0;
+    const rawMonto = row[8];
+    const monto = typeof rawMonto === 'number' ? rawMonto : (parseFloat(String(rawMonto||'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.')) || 0);
     return {
       rowExcel: i + 4,
       id:       Number(rawId),
@@ -181,12 +201,12 @@ function parseRows(rows) {
       cuit:     String(row[2]||'').trim(),
       mes:      String(row[3]||'').trim().toUpperCase().substring(0,3),
       anio:     Number(row[4])||0,
-      fechaEmision: String(row[5]||'').trim(),
-      nroFactura:   String(row[6]||'').trim(),
+      fechaEmision: excelDateToText(t[5] || row[5]),
+      nroFactura:   String(t[6] || row[6] || '').trim(),
       concepto:     String(row[7]||'').trim(),
       monto,
-      estado:   String(row[9]||'Pendiente').trim(),
-      fechaPago:String(row[10]||'').trim(),
+      estado:   normEstado(row[9]),
+      fechaPago: excelDateToText(t[10] || row[10]),
       notas:    String(row[11]||'').trim(),
       pdf:      String(row[12]||'').trim(),
     };
@@ -264,8 +284,8 @@ function App() {
     try {
       const tk = t||await getToken();
       let id = fid; if(!id){id=await getFileId(tk); setFid(id);}
-      const rows = await readSheet(tk,id);
-      setFacturas(parseRows(rows));
+      const range = await readSheet(tk,id);
+      setFacturas(parseRows(range));
     } catch(e){ setError(e.message); } finally{ setLoading(false); }
   }
 
@@ -279,12 +299,13 @@ function App() {
     setMarking(f.rowExcel);
     try {
       const tk = await getToken();
-      await patchCell(tk,fid,`J${f.rowExcel}`,nuevoEstado);
+      let id = fid; if(!id){ id = await getFileId(tk); setFid(id); }
+      await patchCell(tk,id,`J${f.rowExcel}`,nuevoEstado);
       if(nuevoEstado==='Pagada') {
         const hoy = new Date();
-        await patchCell(tk,fid,`K${f.rowExcel}`,`${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`);
+        await patchCell(tk,id,`K${f.rowExcel}`,`${String(hoy.getDate()).padStart(2,'0')}/${String(hoy.getMonth()+1).padStart(2,'0')}/${hoy.getFullYear()}`);
       }
-      setFacturas(prev=>prev.map(x=>x.rowExcel===f.rowExcel?{...x,estado:nuevoEstado}:x));
+      setFacturas(prev=>prev.map(x=>x.rowExcel===f.rowExcel?{...x,estado:nuevoEstado,fechaPago:nuevoEstado==='Pagada'?`${String(new Date().getDate()).padStart(2,'0')}/${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`:x.fechaPago}:x));
     } catch(e){ setError(e.message); } finally{ setMarking(null); }
   }
 
