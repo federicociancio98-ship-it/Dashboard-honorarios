@@ -33,7 +33,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
 
@@ -89,14 +88,11 @@
     .card-title { font-size: 12px; color: var(--text-soft); margin-bottom: 16px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
     .card-pad-md { padding: 18px 20px; }
 
-    /* ── KPIs ── */
     .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-bottom: 24px; }
     .kpi { background: var(--surface); border-radius: var(--radius); border: 1.5px solid var(--border); box-shadow: var(--shadow); padding: 18px 20px; min-width: 0; overflow: hidden; }
     .kpi-label { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; line-height: 1.3; }
     .kpi-value { font-family: 'DM Serif Display'; font-size: clamp(18px, 4.2vw, 28px); color: var(--text); line-height: 1.1; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
-    /* Grid responsive para cards de tarjetas: 150px minimo, auto-fit. Las KPI tienen valores
-       grandes y nombres largos como "Santa Fe PAPA", por eso necesitan mas ancho minimo. */
     .kpis-cards { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important; }
     .kpis-cards .kpi-value { font-size: clamp(16px, 3.6vw, 22px); }
     .kpi.slate { border-top: 3px solid var(--slate); }
@@ -494,7 +490,6 @@ async function ensureOrigenIngresoRegistered({categoria, nombre, cuit='', recurr
 // Formato esperado: PREFIJO_AAAAMMDD_MES AÑO.pdf. El prefijo se valida contra la tabla de orígenes.
 const PDF_NAME_REGEX = /^([A-Z0-9]{2,24})_(\d{8})_(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC) (\d{4})\.pdf$/i;
 
-// Paleta de colores Honorarios para charts
 const COLORS_PALETTE = ['#6b8cae','#7aa68a','#9b86a8','#c4a882','#d4856a','#8fb3c8','#a8c5b0','#b7a4c2','#d4bfa0','#dfa28a'];
 const CARD_COLORS = { 'Santa Fe PAPA': '#7aa68a', 'Macro PAPA': '#1f5fa8', 'Macro FEDE': '#1f5fa8', 'BBVA FEDE': '#49a6d8' };
 
@@ -502,27 +497,15 @@ if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
   Chart.register(ChartDataLabels);
   Chart.defaults.plugins.datalabels = { display: false };
 }
-
 function donutOptions(extra = {}) {
   return {
     responsive: true, maintainAspectRatio: false, cutout: '62%',
     plugins: {
       legend: { position: 'right', labels: { color: '#2c2825', boxWidth: 10, font: { size: 11 }, padding: 8 } },
       datalabels: {
-        display: ctx => {
-          const data = ctx.chart.data.datasets[0].data || [];
-          const total = data.reduce((a,v)=>a+Number(v||0),0);
-          const v = Number(data[ctx.dataIndex] || 0);
-          return total > 0 && v / total >= 0.04;
-        },
-        color: '#fff',
-        font: { weight: '600', size: 11, family: 'DM Sans' },
-        formatter: (value, ctx) => {
-          const data = ctx.chart.data.datasets[0].data || [];
-          const total = data.reduce((a,v)=>a+Number(v||0),0);
-          if (!total) return '';
-          return Math.round((value / total) * 100) + '%';
-        }
+        display: ctx => { const d = ctx.chart.data.datasets[0].data || []; const t = d.reduce((a,v)=>a+Number(v||0),0); const v = Number(d[ctx.dataIndex] || 0); return t > 0 && v / t >= 0.04; },
+        color: '#fff', font: { weight: '600', size: 11, family: 'DM Sans' },
+        formatter: (value, ctx) => { const d = ctx.chart.data.datasets[0].data || []; const t = d.reduce((a,v)=>a+Number(v||0),0); return t ? Math.round((value / t) * 100) + '%' : ''; }
       }
     },
     ...extra
@@ -634,6 +617,7 @@ function login() {
 }
 async function logout() {
   if (!confirm('¿Cerrar sesión?')) return;
+  try { if (sessionId && driveItem) await gFetch(`/me/drive/items/${driveItem.id}/workbook/closeSession`, { method: 'POST' }); } catch (e) { console.warn('closeSession:', e); }
   sessionStorage.clear();
   msalApp.logoutRedirect({ postLogoutRedirectUri: window.location.origin + window.location.pathname });
 }
@@ -750,141 +734,94 @@ function a1Parts(address) {
 }
 
 async function openWorkbook() {
-  sessionId = null; // El Excel de gastos ya no usa workbook sessions.
-  if (!window.XLSX) throw new Error('No se cargó la librería XLSX. Refrescá la página.');
   driveItem = await gFetch(`/me/drive/root:/${encodePath(CONFIG.excelPath)}:`);
-  const t = await getToken();
-  const res = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${driveItem.id}/content`, {
-    headers: { Authorization: 'Bearer ' + t }
+  const s = await gFetch(`/me/drive/items/${driveItem.id}/workbook/createSession`, {
+    method: 'POST', body: JSON.stringify({ persistChanges: true })
   });
-  if (!res.ok) throw new Error('No se pudo descargar el Excel de gastos: ' + res.status + ' ' + await res.text());
-  const ab = await res.arrayBuffer();
-  gastosWorkbook = XLSX.read(ab, {type:'array', cellDates:false});
-  // Asegurar hojas mínimas. No depende de la API /workbook de Graph.
-  Object.keys(SHEETS).forEach(k => { if (EXPECTED_HEADERS[k]) ensureSheetForKey(k); });
+  sessionId = s.id;
+  // Health check: verificar que todas las tablas esperadas existan. Si falta
+  // alguna damos un error claro indicando exactamente que tabla agregar.
+  const required = Object.values(TABLES);
+  const missing = [];
+  for (const t of required) {
+    try { await gFetch(`/me/drive/items/${driveItem.id}/workbook/tables/${encodeURIComponent(t)}/range?$select=address`); }
+    catch (e) { if (/404|ItemNotFound|itemNotFound/.test(String(e.message))) missing.push(t); }
+  }
+  if (missing.length) {
+    throw new Error('Faltan estas tablas en Gastos 2026.xlsx: ' + missing.join(', ') + '. Subi la version FINAL del Excel a OneDrive.');
+  }
 }
 
-async function saveGastosWorkbook() {
-  if (!gastosWorkbook || !driveItem) return;
-  const t = await getToken();
-  const wbout = XLSX.write(gastosWorkbook, {bookType:'xlsx', type:'array'});
-  const upload = async () => fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${driveItem.id}/content`, {
-    method: 'PUT',
-    headers: {
-      Authorization: 'Bearer ' + t,
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    },
-    body: wbout
-  });
-  let res = await upload();
-  for (let attempt = 0; attempt < 3 && !res.ok && [409, 412, 423, 503].includes(res.status); attempt++) {
-    await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
-    try { driveItem = await gFetch(`/me/drive/root:/${encodePath(CONFIG.excelPath)}:`); } catch (_) {}
-    res = await upload();
-  }
-  if (!res.ok) {
-    const txt = await res.text();
-    const locked = res.status === 412 || res.status === 423 || /notAllowed|resourceLocked|locked|coauth/i.test(txt);
-    if (locked) throw new Error('Gastos 2026.xlsx parece estar abierto en Excel/OneDrive (escritorio, app movil u otra pestana). Cerralo y reintenta.');
-    throw new Error('No se pudo guardar el Excel de gastos: ' + res.status + ' ' + txt);
-  }
-  try { driveItem = await res.json(); } catch (_) {}
-}
+async function saveGastosWorkbook() { /* no-op tras refactor a session API */ }
 
 async function readTable(name) {
-  const key = tableKeyFromName(name);
-  if (!key) return { headers: [], data: [], address: '' };
-  const sheetName = SHEETS[key];
-  const ws = ensureSheetForKey(key);
-  const aoa = sheetAoa(sheetName);
-  const fallbackHeaders = EXPECTED_HEADERS[key] || [];
-  let headers = (aoa[0] || []).map(h => String(h || '').trim());
-  if (!headers.filter(Boolean).length) {
-    headers = fallbackHeaders;
-    XLSX.utils.sheet_add_aoa(ws, [headers], {origin:'A1'});
+  try {
+    const r = await gFetch(`/me/drive/items/${driveItem.id}/workbook/tables/${encodeURIComponent(name)}/range?$select=address,values`);
+    const values = r.values || [];
+    const headers = (values[0] || []).map(h => String(h == null ? '' : h).trim());
+    const data = values.slice(1)
+      .map((row, i) => ({ row: row || [], originalIdx: i + 1 }))
+      .filter(({ row }) => row.some(x => x !== null && x !== '' && x !== undefined))
+      .map(({ row, originalIdx }) => {
+        const o = { __rowIndex: originalIdx, __address: r.address };
+        headers.forEach((h, j) => { if (h) o[h] = row[j]; });
+        return o;
+      });
+    return { headers, data, address: r.address };
+  } catch (e) {
+    console.warn(`readTable(${name}) fallo:`, e.message);
+    return { headers: [], data: [], address: '' };
   }
-  // limitar al ancho real de headers esperados si la hoja venía con columnas visuales extra
-  const usefulCols = Math.max(headers.filter(Boolean).length, fallbackHeaders.length, 1);
-  headers = headers.slice(0, usefulCols);
-  const data = aoa.slice(1)
-    .map((row, i) => ({row: (row || []).slice(0, usefulCols), originalIdx: i + 1}))
-    .filter(({row}) => !aoaIsEmptyRow(row))
-    .map(({row, originalIdx}) => {
-      const o = {__rowIndex: originalIdx, __address: `${sheetName}!A1:${XLSX.utils.encode_cell({r: Math.max(aoa.length-1,0), c: usefulCols-1})}`};
-      headers.forEach((h,j) => { if (h) o[h] = row[j]; });
-      return o;
-    });
-  const endCell = XLSX.utils.encode_cell({r: Math.max(aoa.length-1, 0), c: usefulCols-1});
-  return { headers, data, address: `${sheetName}!A1:${endCell}` };
 }
 
 async function patchRange(sheet, address, values2d) {
-  const key = keyFromSheetName(sheet);
-  const ws = key ? ensureSheetForKey(key) : (gastosWorkbook.Sheets[sheet] || (gastosWorkbook.SheetNames.push(sheet), gastosWorkbook.Sheets[sheet] = XLSX.utils.aoa_to_sheet([[]])));
-  const parts = a1Parts(address);
-  for (let r=0; r<values2d.length; r++) {
-    for (let c=0; c<(values2d[r] || []).length; c++) {
-      setCell(ws, parts.startRow + r, parts.startColNum + c, values2d[r][c]);
-    }
-  }
-  await saveGastosWorkbook();
-}
-
-function _addRowToWorkbook(tableName, values) {
-  // Inserta una fila al workbook EN MEMORIA, sin disparar el upload a OneDrive.
-  // Para batch writes, usar addRowsBatch que llama esto N veces + 1 save al final.
-  const key = tableKeyFromName(tableName);
-  if (!key) throw new Error('Tabla no configurada: ' + tableName);
-  const sheetName = SHEETS[key];
-  const ws = ensureSheetForKey(key);
-  const headers = EXPECTED_HEADERS[key] || [];
-  const aoa = sheetAoa(sheetName);
-  const colCount = Math.max(headers.length, (aoa[0] || []).filter(x=>x!=='').length, values.length);
-  if (values.length < colCount) values = values.concat(Array(colCount - values.length).fill(''));
-  if (values.length > colCount) values = values.slice(0, colCount);
-  let rowIndex0 = Math.max(aoa.length, 1);
-  for (let i=1; i<aoa.length; i++) {
-    const row = (aoa[i] || []).slice(0, colCount);
-    if (aoaIsEmptyRow(row)) { rowIndex0 = i; break; }
-  }
-  XLSX.utils.sheet_add_aoa(ws, [values], {origin:{r: rowIndex0, c:0}});
-  updateRef(ws, rowIndex0, colCount-1);
+  await gFetch(`/me/drive/items/${driveItem.id}/workbook/worksheets/${encodeURIComponent(sheet)}/range(address='${address}')`, {
+    method: 'PATCH', body: JSON.stringify({ values: values2d })
+  });
 }
 
 async function addRow(tableName, values) {
-  _addRowToWorkbook(tableName, values);
-  await saveGastosWorkbook();
+  // Asegurar que el numero de valores coincida con las columnas de la tabla.
+  // Si no coincide Graph devuelve 400 "InvalidArgument".
+  const key = tableKeyFromName(tableName);
+  const expectedCols = (EXPECTED_HEADERS[key] || []).length;
+  if (expectedCols && values.length !== expectedCols) {
+    if (values.length < expectedCols) values = [...values, ...Array(expectedCols - values.length).fill('')];
+    else values = values.slice(0, expectedCols);
+  }
+  await gFetch(`/me/drive/items/${driveItem.id}/workbook/tables/${encodeURIComponent(tableName)}/rows/add`, {
+    method: 'POST', body: JSON.stringify({ values: [values] })
+  });
 }
 
 async function addRowsBatch(adds) {
-  // adds = [{ table, values }, ...]. Hace un solo upload final.
-  for (const a of adds) _addRowToWorkbook(a.table, a.values);
-  await saveGastosWorkbook();
+  const grouped = {};
+  for (const a of adds) {
+    const key = tableKeyFromName(a.table);
+    const expectedCols = (EXPECTED_HEADERS[key] || []).length;
+    let v = a.values;
+    if (expectedCols && v.length !== expectedCols) {
+      if (v.length < expectedCols) v = [...v, ...Array(expectedCols - v.length).fill('')];
+      else v = v.slice(0, expectedCols);
+    }
+    if (!grouped[a.table]) grouped[a.table] = [];
+    grouped[a.table].push(v);
+  }
+  for (const [tableName, vals] of Object.entries(grouped)) {
+    await gFetch(`/me/drive/items/${driveItem.id}/workbook/tables/${encodeURIComponent(tableName)}/rows/add`, {
+      method: 'POST', body: JSON.stringify({ values: vals })
+    });
+  }
 }
 
 async function writeFirstBlankDataRowIfAvailable(key, values) {
-  const sheet = SHEETS[key];
-  if (!sheet) return false;
-  const ws = ensureSheetForKey(key);
-  const aoa = sheetAoa(sheet);
-  const colCount = Math.max((EXPECTED_HEADERS[key] || []).length, values.length);
-  for (let i=1; i<aoa.length; i++) {
-    const row = (aoa[i] || []).slice(0, colCount);
-    if (aoaIsEmptyRow(row)) {
-      XLSX.utils.sheet_add_aoa(ws, [values], {origin:{r:i, c:0}});
-      await saveGastosWorkbook();
-      return true;
-    }
-  }
-  return false;
+  try { await addRow(TABLES[key], values); return true; } catch (e) { return false; }
 }
 
 async function patchCell(sheet, address, value) {
-  const key = keyFromSheetName(sheet);
-  const ws = key ? ensureSheetForKey(key) : (gastosWorkbook.Sheets[sheet] || (gastosWorkbook.SheetNames.push(sheet), gastosWorkbook.Sheets[sheet] = XLSX.utils.aoa_to_sheet([[]])));
-  const parts = a1Parts(address);
-  setCell(ws, parts.startRow, parts.startColNum, value);
-  await saveGastosWorkbook();
+  await gFetch(`/me/drive/items/${driveItem.id}/workbook/worksheets/${encodeURIComponent(sheet)}/range(address='${address}')`, {
+    method: 'PATCH', body: JSON.stringify({ values: [[value]] })
+  });
 }
 
 function parseStartRow(address) {
@@ -912,22 +849,15 @@ function parseHonorariosFechaPago(rawValue, rawText) {
     const d = excelDateToDate(rawValue);
     if (d && !isNaN(d)) return d;
   }
-  const candidatos = [rawText, rawValue].map(v => String(v == null ? '' : v).trim()).filter(Boolean);
-  for (const txt of candidatos) {
+  for (const txt of [rawText, rawValue].map(v => String(v == null ? '' : v).trim()).filter(Boolean)) {
     if (!txt || txt === '0') continue;
     let m = txt.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
     m = txt.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
     if (m) return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
     m = txt.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
-    if (m) {
-      const yr = Number(m[3]); const fullY = yr < 50 ? 2000 + yr : 1900 + yr;
-      return new Date(fullY, Number(m[2]) - 1, Number(m[1]));
-    }
-    if (/^\d+(\.\d+)?$/.test(txt)) {
-      const d = excelDateToDate(Number(txt));
-      if (d && !isNaN(d) && d.getFullYear() > 2000) return d;
-    }
+    if (m) { const yr = Number(m[3]); return new Date(yr < 50 ? 2000 + yr : 1900 + yr, Number(m[2]) - 1, Number(m[1])); }
+    if (/^\d+(\.\d+)?$/.test(txt)) { const d = excelDateToDate(Number(txt)); if (d && !isNaN(d) && d.getFullYear() > 2000) return d; }
   }
   return null;
 }
@@ -1071,49 +1001,24 @@ async function appendHonorariosRow(rowData) {
   const cat = rowData.categoriaIngreso || inferCategoriaIngreso(rowData.cliente, rowData.notas, rowData.concepto);
   const tag = cat ? `[CAT:${cat}] ` : '';
   const notasFinal = `${tag}${rowData.notas || ''}`.trim();
-  const toSerial = v => {
-    if (v == null || v === '') return '';
-    if (typeof v === 'number') return v;
-    const s = String(v).trim();
-    let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-    if (m) return dateToExcelSerial(`${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`);
-    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return dateToExcelSerial(s.substring(0,10));
-    return v;
-  };
-  const fechaEmisionSerial = toSerial(rowData.fechaEmision);
-  const fechaPagoSerial = toSerial(rowData.fechaPago);
   const arr = [
-    id, rowData.cliente || '', rowData.cuit || '', rowData.mes || '',
-    Number(rowData.anio) || rowData.anio || '',
-    fechaEmisionSerial, rowData.nroFactura || '', rowData.concepto || '',
-    Number(rowData.monto) || 0, rowData.estado || 'Pendiente',
-    fechaPagoSerial, notasFinal, rowData.pdf || '', rowData.tipo || 'Propia',
+    id,
+    rowData.cliente || '',
+    rowData.cuit || '',
+    rowData.mes || '',
+    rowData.anio || '',
+    rowData.fechaEmision || '',
+    rowData.nroFactura || '',
+    rowData.concepto || '',
+    Number(rowData.monto) || 0,
+    rowData.estado || 'Pendiente',
+    rowData.fechaPago || '',
+    notasFinal,
+    rowData.pdf || '',
+    rowData.tipo || 'Propia',
   ];
   await patchHonorariosRow(row, arr);
-  const mesIdx = MESES_HON.indexOf(String(rowData.mes || '').toUpperCase().substring(0,3));
-  const fp = typeof fechaPagoSerial === 'number' ? excelDateToDate(fechaPagoSerial) : null;
-  const fe = typeof fechaEmisionSerial === 'number' ? excelDateToDate(fechaEmisionSerial) : null;
-  facturas.push({
-    rowExcel: row, id,
-    cliente: String(rowData.cliente || '').trim(),
-    cuit: String(rowData.cuit || '').trim(),
-    mesTxt: String(rowData.mes || '').toUpperCase().substring(0,3),
-    anio: Number(rowData.anio) || 0,
-    mesServicio: mesIdx + 1, anioServicio: Number(rowData.anio) || 0,
-    monto: Number(rowData.monto) || 0,
-    estado: rowData.estado || 'Pendiente',
-    tipo: rowData.tipo || 'Propia',
-    fechaEmision: fe, fechaPago: fp,
-    mesPago: fp ? fp.getMonth() + 1 : null,
-    anioPago: fp ? fp.getFullYear() : null,
-    concepto: String(rowData.concepto || '').trim(),
-    nroFactura: String(rowData.nroFactura || '').trim(),
-    notas: notasFinal, pdf: String(rowData.pdf || '').trim(),
-    categoriaIngreso: cat,
-  });
-  populateMonthFilter();
-  renderAll();
-  try { await loadAll(); } catch (e) { console.warn('loadAll fallo despues de write:', e); }
+  await loadAll();
   return row;
 }
 async function listFolderChildrenHonorarios(folderPath) {
@@ -1312,25 +1217,17 @@ function openIngresoHonorariosLibreModal() {
       showError('En PERITAJE no corresponde usar ingreso compartido. Elegí Facturado o No facturado.');
       return;
     }
-    setStatus('Guardando ingreso manual...', 'wait');
-    const submitBtn = ev.target.querySelector('button[type="submit"]');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando…'; }
     try {
       await ensureOrigenIngresoRegistered({categoria, nombre: fd.cliente, cuit: fd.cuit || oinfo.cuit || '', recurrente:'NO', auditarPDF:'NO', carpetaPDF:'', prefijoPDF:sanitizePrefijo(fd.cliente, categoria)});
       await appendHonorariosRow({
         cliente: fd.cliente, cuit: fd.cuit || oinfo.cuit || '', mes: fd.mes, anio: Number(fd.anio),
-        fechaEmision: fd.fechaEmision || '', nroFactura: '',
+        fechaEmision: fd.fechaEmision ? inputDateToDDMMYYYY(fd.fechaEmision) : '', nroFactura: '',
         concepto: fd.concepto || `Ingreso ${fd.mes} ${fd.anio}`, monto: Number(fd.monto),
-        estado: fd.estado || 'Pagada', fechaPago: fd.estado === 'Pagada' ? (fd.fechaPago || todayInputValue()) : '',
+        estado: fd.estado || 'Pagada', fechaPago: fd.estado === 'Pagada' ? inputDateToDDMMYYYY(fd.fechaPago || todayInputValue()) : '',
         notas: fd.notas || '', pdf: '', tipo: fd.tipo || 'Sin Factura', categoriaIngreso: categoria,
       });
-      closeModal();
-      setStatus('OK Ingreso manual registrado por ' + fmtARS(Number(fd.monto || 0)), 'ok');
-    } catch (e) {
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Registrar'; }
-      showError('No se pudo registrar ingreso manual: ' + (e.message || e));
-      setStatus('Error al guardar ingreso', 'err');
-    }
+      closeModal(); setStatus('✓ Ingreso manual registrado', 'ok');
+    } catch (e) { showError('No se pudo registrar ingreso manual: ' + e.message); setStatus('Error','err'); }
   });
 }
 window.openIngresoHonorariosLibreModal = openIngresoHonorariosLibreModal;
@@ -1358,11 +1255,8 @@ async function auditarPDFsHonorarios() {
           sugerencia = sugerirNombreHonorarios(info.prefijo, pdf.lastModifiedDateTime, '', '');
           const digMatch = pdf.name.match(/_(\d+)_/);
           const digitos = digMatch ? digMatch[1].length : null;
-          if (digitos !== null && digitos !== 8) {
-            hint = `La fecha tiene ${digitos} digitos en lugar de 8. Sugerido: ${sugerencia}`;
-          } else {
-            hint = `No cumple formato. Sugerido: ${sugerencia}`;
-          }
+          if (digitos !== null && digitos !== 8) hint = `La fecha tiene ${digitos} digitos en lugar de 8. Sugerido: ${sugerencia}`;
+          else hint = `No cumple formato. Sugerido: ${sugerencia}`;
           result.summary.malNombrados++;
         } else if (parsed.prefijo !== info.prefijo) {
           status = 'mal-nombrado';
@@ -1520,19 +1414,11 @@ function honorariosForMonth(y, m) {
   const porCobrar = facturas.filter(f => f.estado === 'Pendiente' && f.tipo !== 'Desestimada' && honorarioEmissionKey(f) <= yyyymm);
   return { devengado, cobrado, porCobrar };
 }
-// Mes de pago de la ultima cuota: aplica regla "resumen del mes X se paga el 1ro de X+1".
-function mesPagoUltimaCuota(mesFinPagoSerial) {
-  const fin = excelDateToDate(mesFinPagoSerial);
-  if (!fin) return null;
-  const d = new Date(fin.getFullYear(), fin.getMonth() + 1, 1);
-  return { y: d.getFullYear(), m: d.getMonth() + 1 };
-}
+// Una compra termina en el MES SIGUIENTE al MesFinPago (resumen del mes X se paga en X+1).
+function mesPagoUltimaCuota(s) { const f = excelDateToDate(s); if (!f) return null; const d = new Date(f.getFullYear(), f.getMonth() + 1, 1); return { y: d.getFullYear(), m: d.getMonth() + 1 }; }
 function diffMeses(y1, m1, y2, m2) { return (y2 - y1) * 12 + (m2 - m1); }
 function cuotasTerminandoEn(y, m) {
-  return rows.tarjetas.filter(r => {
-    const p = mesPagoUltimaCuota(r.MesFinPago);
-    return p && p.y === y && p.m === m && Number(r.CuotasRestantes || 0) > 0;
-  });
+  return rows.tarjetas.filter(r => { const p = mesPagoUltimaCuota(r.MesFinPago); return p && p.y === y && p.m === m && Number(r.CuotasRestantes || 0) > 0; });
 }
 
 function tipoFijo(f) {
@@ -1712,9 +1598,8 @@ function ahorroTransaccionesResumen() {
   let ars = arr.filter(r => String(r.Moneda || 'ARS').toUpperCase() === 'ARS').reduce((a,r)=>a+Number(r.Importe||0),0);
   let usd = arr.filter(r => String(r.Moneda || '').toUpperCase() === 'USD').reduce((a,r)=>a+Number(r.Importe||0),0);
   const metasActivas = (rows.ahorro || []).filter(r => String(r.Activa || 'SI').toUpperCase() === 'SI');
-  const metasARS = metasActivas.filter(r => String(r.Moneda || 'ARS').toUpperCase() === 'ARS').reduce((a,r)=>a+Number(r.MontoActual || r.MontoAporte || 0),0);
-  const metasUSD = metasActivas.filter(r => String(r.Moneda || '').toUpperCase() === 'USD').reduce((a,r)=>a+Number(r.MontoActual || r.MontoAporte || 0),0);
-  ars += metasARS; usd += metasUSD;
+  ars += metasActivas.filter(r => String(r.Moneda || 'ARS').toUpperCase() === 'ARS').reduce((a,r)=>a+Number(r.MontoActual || r.MontoAporte || 0),0);
+  usd += metasActivas.filter(r => String(r.Moneda || '').toUpperCase() === 'USD').reduce((a,r)=>a+Number(r.MontoActual || r.MontoAporte || 0),0);
   return { ars, usd, count: arr.length + metasActivas.length };
 }
 function deudaPendienteARS() {
@@ -1769,12 +1654,7 @@ function renderKpis() {
 function renderNotices() {
   const { y, m } = selMonth();
   const terminando = cuotasTerminandoEn(y, m);
-  const proximas = rows.tarjetas.filter(r => {
-    const p = mesPagoUltimaCuota(r.MesFinPago);
-    if (!p) return false;
-    const d = diffMeses(y, m, p.y, p.m);
-    return d >= 1 && d <= 2 && Number(r.CuotasRestantes || 0) > 0;
-  });
+  const proximas = rows.tarjetas.filter(r => { const p = mesPagoUltimaCuota(r.MesFinPago); if (!p) return false; const d = diffMeses(y, m, p.y, p.m); return d >= 1 && d <= 2 && Number(r.CuotasRestantes || 0) > 0; });
   const warnings = resumenTarjetasWarnings(y, m);
   const out = [];
   if (warnings.length) {
@@ -1868,11 +1748,7 @@ function drawResumenCharts() {
   const gs = groupSum(gastosCategorizadosDelMes(), 'Categoría', 'Importe').slice(0, 8);
   const donut = document.getElementById('summaryDonut');
   if (donut) {
-    charts.donut = new Chart(donut, {
-      type: 'doughnut',
-      data: { labels: gs.map(x => x.key), datasets: [{ data: gs.map(x => x.value), backgroundColor: COLORS_PALETTE, borderWidth: 1.5, borderColor: '#fff' }] },
-      options: donutOptions()
-    });
+    charts.donut = new Chart(donut, { type: 'doughnut', data: { labels: gs.map(x => x.key), datasets: [{ data: gs.map(x => x.value), backgroundColor: COLORS_PALETTE, borderWidth: 1.5, borderColor: '#fff' }] }, options: donutOptions() });
   }
   const { porCobrar } = honorariosForMonth(y, m);
   const el = document.getElementById('pendCobroResumen');
@@ -2011,36 +1887,16 @@ function renderIngresosTab() {
         </tbody></table></div>
       </div>
       <div class="card"><div class="card-title">Otros ingresos cargados manualmente — ${MES_NAMES[m-1]} ${y}</div>
-        ${(() => {
-          // Mezclamos: transacciones Tipo='Ingreso' (carga directa) + facturas tipo='Sin Factura' cobradas
-          // en el mes seleccionado. Asi el usuario ve TODO lo que cargo manualmente.
-          const facturasSF = facturas.filter(f => f.tipo === 'Sin Factura' && f.estado === 'Pagada' && f.anioPago === y && f.mesPago === m).map(f => ({
-            sortMs: f.fechaPago ? f.fechaPago.getTime() : 0,
-            fecha: f.fechaPago ? f.fechaPago.toLocaleDateString('es-AR') : '',
-            categoria: f.cliente,
-            desc: f.concepto || ('Honorarios ' + f.mesTxt + ' ' + f.anioServicio),
-            monto: Number(f.monto || 0),
-            fuente: 'Sin factura'
-          }));
-          const otrosMix = otros.map(r => ({
-            sortMs: excelDateToDate(r.Fecha)?.getTime() || 0,
-            fecha: dateText(r.Fecha), categoria: r.Categoría || '', desc: r.Descripción || '',
-            monto: Number(r.Importe || 0), fuente: 'Manual'
-          }));
-          const lista = [...facturasSF, ...otrosMix].sort((a,b)=> b.sortMs - a.sortMs);
-          const total = lista.reduce((a,x)=>a+x.monto,0);
-          return `<div style="font-family:'DM Serif Display';font-size:24px;margin-bottom:12px;color:var(--sage)">${fmtARS(total)}</div>
-            <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Origen</th><th>Categoría / cliente</th><th>Descripción</th><th class="num">Importe</th></tr></thead><tbody>
-              ${lista.length ? lista.map(r => `<tr><td>${escapeHtml(r.fecha)}</td><td><span class="badge ${r.fuente==='Sin factura'?'badge-mauve':'badge-pagada'}">${r.fuente}</span></td><td><strong>${escapeHtml(r.categoria)}</strong></td><td>${escapeHtml(r.desc)}</td><td class="num">${fmtARS(r.monto)}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px">Sin ingresos manuales este mes.</td></tr>'}
-            </tbody></table></div>`;
-        })()}
+        <div style="font-family:'DM Serif Display';font-size:24px;margin-bottom:12px;color:var(--sage)">${fmtARS(totalOtros)}</div>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th class="num">Importe</th></tr></thead><tbody>
+          ${otros.length ? otros.map(r => `<tr><td>${dateText(r.Fecha)}</td><td>${escapeHtml(r.Categoría||'')}</td><td>${escapeHtml(r.Descripción||'')}</td><td class="num">${fmtARS(r.Importe)}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px">Sin ingresos manuales este mes.</td></tr>'}
+        </tbody></table></div>
       </div>
     </div>
 
     <div class="card" style="margin-bottom:18px"><div class="card-title">Pendientes de cobro acumulados</div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Marcá como pagada directamente desde aca, sin importar el mes seleccionado arriba.</div>
-      <div class="table-wrap"><table><thead><tr><th>Categoría</th><th>Cliente / caso</th><th>Período</th><th class="num">Monto</th><th>Acción</th></tr></thead><tbody>
-        ${porCobrar.length ? porCobrar.map(f => `<tr><td><span class="badge badge-info">${escapeHtml(f.categoriaIngreso || inferCategoriaIngreso(f.cliente, f.notas, f.concepto))}</span></td><td><div><strong>${escapeHtml(f.cliente)}</strong></div>${f.concepto ? `<div style="font-size:11px;color:var(--text-muted)">${escapeHtml(f.concepto)}</div>` : ''}${f.tipo && f.tipo !== 'Propia' ? `<div style="margin-top:3px">${tipoBadge(f.tipo)}</div>` : ''}</td><td><strong>${f.mesTxt} ${f.anioServicio}</strong></td><td class="num"><strong>${fmtARS(f.monto)}</strong></td><td><button class="btn btn-success btn-sm" onclick="marcarFacturaHonorarios(${f.rowExcel}, 'Pagada')">✓ Marcar pagada</button></td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px">Sin pendientes 🎉</td></tr>'}
+      <div class="table-wrap"><table><thead><tr><th>Categoría</th><th>Cliente / caso</th><th>Período</th><th>Tipo</th><th>Concepto</th><th class="num">Monto</th><th>Acción</th></tr></thead><tbody>
+        ${porCobrar.length ? porCobrar.map(f => `<tr><td><span class="badge badge-info">${escapeHtml(f.categoriaIngreso || inferCategoriaIngreso(f.cliente, f.notas, f.concepto))}</span></td><td><strong>${escapeHtml(f.cliente)}</strong></td><td>${f.mesTxt} ${f.anioServicio}</td><td>${tipoBadge(f.tipo)}</td><td>${escapeHtml(f.concepto||'')}</td><td class="num">${fmtARS(f.monto)}</td><td><button class="btn btn-success btn-sm" onclick="marcarFacturaHonorarios(${f.rowExcel}, 'Pagada')">✓ Marcar pagada</button></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:18px">Sin pendientes 🎉</td></tr>'}
       </tbody></table></div>
     </div>
 
@@ -2202,7 +2058,7 @@ function renderTarjetasTab() {
     </div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-title">Monto a pagar por tarjeta — ${MES_NAMES[m-1]} ${y}</div>
-      <div class="kpis kpis-cards" style="margin-bottom:0">${cuotasPorTarjeta.map(c=>`<div class="kpi" style="border-top:3px solid ${c.color}"><div class="kpi-label">${escapeHtml(c.tarjeta)}</div><div class="kpi-value" style="color:${c.color}">${fmtARS(c.monto)}</div><div class="kpi-sub">${c.cuotas} cuota(s)</div></div>`).join('')}</div>
+      <div class="kpis" style="grid-template-columns:repeat(4,1fr);margin-bottom:0">${cuotasPorTarjeta.map(c=>`<div class="kpi" style="border-top:3px solid ${c.color}"><div class="kpi-label">${escapeHtml(c.tarjeta)}</div><div class="kpi-value" style="color:${c.color}">${fmtARS(c.monto)}</div><div class="kpi-sub">${c.cuotas} cuota(s)</div></div>`).join('')}</div>
     </div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-title">Control de resumen real vs planilla — ${MES_NAMES[m-1]} ${y}</div>
@@ -2212,14 +2068,14 @@ function renderTarjetasTab() {
     </div>
     <div class="card" style="margin-bottom:18px">
       <div class="card-title">Evolución de cuotas por tarjeta</div>
-      <div class="chart-box tall"><canvas id="cardsLine"></canvas></div>
+      <div class="chart-box"><canvas id="cardsLine"></canvas></div>
     </div>
     <div class="grid-2">
       <div class="card"><div class="card-title">A pagar — ${MES_NAMES[m-1]} ${y}</div><div class="table-wrap"><table><thead><tr><th>Tarjeta</th><th>Descripción</th><th>Cuota</th><th class="num">Monto</th></tr></thead><tbody>
         ${cuotas.length ? cuotas.sort((a,b)=>Number(b.MontoCuota)-Number(a.MontoCuota)).map(r => `<tr><td>${cardBadge(r.Tarjeta)}</td><td>${escapeHtml(r.Descripción)}</td><td>${r.NroCuota || ''}/${r.TotalCuotas || ''}</td><td class="num">${fmtARS(r.MontoCuota)}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Sin cuotas en este mes.</td></tr>'}
       </tbody></table></div></div>
       <div class="card"><div class="card-title">Compras con cuotas pendientes</div><div class="table-wrap"><table><thead><tr><th>Tarjeta</th><th>Descripción</th><th>Cuotas rest.</th><th class="num">Valor cuota</th><th>Termina</th></tr></thead><tbody>
-        ${pendiendoCompras.slice(0, 40).map(r => { const p = mesPagoUltimaCuota(r.MesFinPago); const isTerminando = p && p.y === y && p.m === m; const yaPaga = p && diffMeses(p.y, p.m, y, m) > 0; return `<tr style="${isTerminando ? 'background:var(--sage-light)' : ''}"><td>${cardBadge(r.Tarjeta)}</td><td>${escapeHtml(r.Descripción)}</td><td>${r.CuotasRestantes}/${r.Cuotas}</td><td class="num">${fmtARS(r.ValorCuota)}</td><td>${dateText(r.MesFinPago)}${isTerminando ? ' 🎉 (se paga este mes)' : ''}${yaPaga ? ' · ya pagada' : ''}</td></tr>`; }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Sin cuotas pendientes 🎉</td></tr>'}
+        ${pendiendoCompras.slice(0, 40).map(r => { const fin = excelDateToDate(r.MesFinPago); const isTerminando = fin && fin.getFullYear() === y && (fin.getMonth() + 1) === m; return `<tr style="${isTerminando ? 'background:var(--sage-light)' : ''}"><td>${cardBadge(r.Tarjeta)}</td><td>${escapeHtml(r.Descripción)}</td><td>${r.CuotasRestantes}/${r.Cuotas}</td><td class="num">${fmtARS(r.ValorCuota)}</td><td>${dateText(r.MesFinPago)}${isTerminando ? ' 🎉' : ''}</td></tr>`; }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Sin cuotas pendientes 🎉</td></tr>'}
       </tbody></table></div></div>
     </div>
     <details class="card" style="margin-top:18px"><summary style="cursor:pointer;font-weight:600;margin-bottom:12px">Detalle editable de compras con tarjeta</summary>
@@ -2391,11 +2247,7 @@ function drawCategoriasCharts() {
     renderEmptyChartMessage('catDonut', 'Sin gastos imputados para el mes seleccionado.');
     renderEmptyChartMessage('catBars', 'Sin gastos imputados para el mes seleccionado.');
   } else {
-    charts.catDonut = new Chart(document.getElementById('catDonut'), {
-      type: 'doughnut',
-      data: { labels: gs.map(x => x.key), datasets: [{ data: gs.map(x => x.value), backgroundColor: COLORS_PALETTE.concat(COLORS_PALETTE, COLORS_PALETTE), borderWidth: 1.5, borderColor: '#fff' }] },
-      options: donutOptions()
-    });
+    charts.catDonut = new Chart(document.getElementById('catDonut'), { type: 'doughnut', data: { labels: gs.map(x => x.key), datasets: [{ data: gs.map(x => x.value), backgroundColor: COLORS_PALETTE.concat(COLORS_PALETTE, COLORS_PALETTE), borderWidth: 1.5, borderColor: '#fff' }] }, options: donutOptions() });
     charts.catBars = new Chart(document.getElementById('catBars'), {
       type: 'bar', data: { labels: gs.map(x => x.key), datasets: [{ data: gs.map(x => x.value), backgroundColor: gs.map((_, i) => COLORS_PALETTE[i % COLORS_PALETTE.length]), borderRadius: 4 }] },
       options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#b0a89e', font: { size: 10 }, callback: v => fmtARS(v) }, grid: { color: '#e8e4dc' } }, y: { ticks: { color: '#b0a89e', font: { size: 10 } }, grid: { display: false } } } }
@@ -2406,91 +2258,15 @@ function drawCategoriasCharts() {
   $('#subcatTable').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Categoría / Subcategoría</th><th class="num">Monto</th><th class="num">% total</th></tr></thead><tbody>${sub.map(x => `<tr><td>${escapeHtml(x.key)}</td><td class="num">${fmtARS(x.value)}</td><td class="num">${total ? fmtPct(x.value / total * 100) : '—'}</td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:20px">Sin subcategorías.</td></tr>'}</tbody></table></div>`;
 }
 
-// ── TAB: MOVIMIENTOS ─────────────────────────────────────────────────────
 function renderMovimientosTab() {
   const { y, m, tx } = selMonth();
-  const ingresosFact = facturas.filter(f => f.estado === 'Pagada' && f.anioPago === y && f.mesPago === m && f.tipo !== 'Desestimada').map(f => ({
-    sortMs: f.fechaPago ? f.fechaPago.getTime() : 0,
-    fechaTxt: f.fechaPago ? f.fechaPago.toLocaleDateString('es-AR') : '',
-    fuente: 'Honorarios',
-    categoria: f.cliente,
-    detalle: (f.concepto || ('Honorarios ' + f.mesTxt + ' ' + f.anioServicio)) + (f.nroFactura ? ' · ' + f.nroFactura : ''),
-    medio: '',
-    importeFmt: fmtARS(f.monto),
-    monto: Number(f.monto || 0),
-    actions: `<button class="btn btn-outline btn-sm" onclick="marcarFacturaHonorarios(${f.rowExcel}, 'Pendiente')">Revertir cobro</button>`
-  }));
-  const ingresosManual = tx.filter(r => r.Tipo === 'Ingreso').map(r => ({
-    sortMs: excelDateToDate(r.Fecha)?.getTime() || 0,
-    fechaTxt: dateText(r.Fecha),
-    fuente: 'Manual',
-    categoria: r.Categoría || '',
-    detalle: r.Descripción || '',
-    medio: r.MedioPago || '',
-    importeFmt: fmtMoney(r.Importe, r.Moneda),
-    monto: Number(r.Importe || 0),
-    actions: `<button class="btn btn-outline btn-sm" onclick="openMovimientoEdit(${r.__rowIndex})">Editar</button> <button class="btn btn-danger btn-sm" onclick="deleteMovimiento(${r.__rowIndex})">Eliminar</button>`
-  }));
-  const ingresos = [...ingresosFact, ...ingresosManual].sort((a, b) => b.sortMs - a.sortMs);
-  const totalIngresos = ingresos.reduce((a, x) => a + x.monto, 0);
-  const egresos = tx.filter(r => r.Tipo === 'Gasto').sort((a, b) => {
-    const da = excelDateToDate(a.Fecha)?.getTime() || 0;
-    const db = excelDateToDate(b.Fecha)?.getTime() || 0;
-    return db - da;
-  });
-  const totalEgresos = sum(egresos, 'Importe');
-  return `
-    <div class="card" style="margin-bottom:18px">
-      <div class="section-header">
-        <h3>Ingresos del mes — <span style="color:#3d6a52">${fmtARS(totalIngresos)}</span></h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-success btn-sm" onclick="openIngresoHonorariosLibreModal()">+ Ingreso honorarios</button>
-          <button class="btn btn-cta btn-sm" onclick="openTxModal()">+ Cargar otro</button>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${ingresosFact.length} factura(s) cobradas · ${ingresosManual.length} ingreso(s) manuales</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Fecha</th><th>Fuente</th><th>Cliente / Categoría</th><th>Detalle</th><th>Medio</th><th class="num">Importe</th><th>Acción</th></tr></thead>
-          <tbody>
-            ${ingresos.length ? ingresos.map(mov => `
-              <tr>
-                <td>${escapeHtml(mov.fechaTxt)}</td>
-                <td><span class="badge ${mov.fuente === 'Honorarios' ? 'badge-info' : 'badge-pagada'}">${mov.fuente}</span></td>
-                <td><strong>${escapeHtml(mov.categoria)}</strong></td>
-                <td>${escapeHtml(mov.detalle)}</td>
-                <td>${escapeHtml(mov.medio)}</td>
-                <td class="num" style="color:#3d6a52;font-weight:600">${mov.importeFmt}</td>
-                <td>${mov.actions}</td>
-              </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">Sin ingresos este mes.</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-header">
-        <h3>Egresos del mes — <span style="color:#b85f3f">${fmtARS(totalEgresos)}</span></h3>
-        <button class="btn btn-cta btn-sm" onclick="openTxModal()">+ Cargar egreso</button>
-      </div>
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${egresos.length} movimiento(s). Incluye pagos de deuda, aportes a metas, pagos del mes y pagos de resumen de tarjeta.</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Fecha</th><th>Categoría</th><th>Subcategoría</th><th>Descripción</th><th>Medio</th><th class="num">Importe</th><th>Acción</th></tr></thead>
-          <tbody>
-            ${egresos.length ? egresos.map(r => `
-              <tr>
-                <td>${dateText(r.Fecha)}</td>
-                <td>${escapeHtml(r.Categoría || '')}</td>
-                <td>${escapeHtml(r.Subcategoría || '')}</td>
-                <td>${escapeHtml(r.Descripción || '')}</td>
-                <td>${escapeHtml(r.MedioPago || '')}</td>
-                <td class="num" style="color:#b85f3f;font-weight:600">${fmtMoney(r.Importe, r.Moneda)}</td>
-                <td><button class="btn btn-outline btn-sm" onclick="openMovimientoEdit(${r.__rowIndex})">Editar</button> <button class="btn btn-danger btn-sm" onclick="deleteMovimiento(${r.__rowIndex})">Eliminar</button></td>
-              </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">Sin egresos este mes.</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
+  const ingF = facturas.filter(f => f.estado === 'Pagada' && f.anioPago === y && f.mesPago === m && f.tipo !== 'Desestimada').map(f => ({ sortMs: f.fechaPago ? f.fechaPago.getTime() : 0, fechaTxt: f.fechaPago ? f.fechaPago.toLocaleDateString('es-AR') : '', fuente: 'Honorarios', categoria: f.cliente, detalle: (f.concepto || ('Honorarios ' + f.mesTxt + ' ' + f.anioServicio)) + (f.nroFactura ? ' · ' + f.nroFactura : ''), medio: '', importeFmt: fmtARS(f.monto), monto: Number(f.monto || 0), actions: `<button class="btn btn-outline btn-sm" onclick="marcarFacturaHonorarios(${f.rowExcel}, 'Pendiente')">Revertir cobro</button>` }));
+  const ingM = tx.filter(r => r.Tipo === 'Ingreso').map(r => ({ sortMs: excelDateToDate(r.Fecha)?.getTime() || 0, fechaTxt: dateText(r.Fecha), fuente: 'Manual', categoria: r.Categoría || '', detalle: r.Descripción || '', medio: r.MedioPago || '', importeFmt: fmtMoney(r.Importe, r.Moneda), monto: Number(r.Importe || 0), actions: `<button class="btn btn-outline btn-sm" onclick="openMovimientoEdit(${r.__rowIndex})">Editar</button> <button class="btn btn-danger btn-sm" onclick="deleteMovimiento(${r.__rowIndex})">Eliminar</button>` }));
+  const ing = [...ingF, ...ingM].sort((a, b) => b.sortMs - a.sortMs);
+  const totIng = ing.reduce((a, x) => a + x.monto, 0);
+  const eg = tx.filter(r => r.Tipo === 'Gasto').sort((a, b) => (excelDateToDate(b.Fecha)?.getTime() || 0) - (excelDateToDate(a.Fecha)?.getTime() || 0));
+  const totEg = sum(eg, 'Importe');
+  return `<div class="card" style="margin-bottom:18px"><div class="section-header"><h3>Ingresos del mes — <span style="color:#3d6a52">${fmtARS(totIng)}</span></h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-success btn-sm" onclick="openIngresoHonorariosLibreModal()">+ Ingreso honorarios</button><button class="btn btn-cta btn-sm" onclick="openTxModal()">+ Cargar otro</button></div></div><div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${ingF.length} factura(s) cobradas · ${ingM.length} ingreso(s) manuales</div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Fuente</th><th>Cliente / Categoría</th><th>Detalle</th><th>Medio</th><th class="num">Importe</th><th>Acción</th></tr></thead><tbody>${ing.length ? ing.map(mov => `<tr><td>${escapeHtml(mov.fechaTxt)}</td><td><span class="badge ${mov.fuente === 'Honorarios' ? 'badge-info' : 'badge-pagada'}">${mov.fuente}</span></td><td><strong>${escapeHtml(mov.categoria)}</strong></td><td>${escapeHtml(mov.detalle)}</td><td>${escapeHtml(mov.medio)}</td><td class="num" style="color:#3d6a52;font-weight:600">${mov.importeFmt}</td><td>${mov.actions}</td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">Sin ingresos este mes.</td></tr>'}</tbody></table></div></div><div class="card"><div class="section-header"><h3>Egresos del mes — <span style="color:#b85f3f">${fmtARS(totEg)}</span></h3><button class="btn btn-cta btn-sm" onclick="openTxModal()">+ Cargar egreso</button></div><div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">${eg.length} movimiento(s). Incluye pagos de deuda, aportes a metas, pagos del mes y resumen TC.</div><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Categoría</th><th>Subcategoría</th><th>Descripción</th><th>Medio</th><th class="num">Importe</th><th>Acción</th></tr></thead><tbody>${eg.length ? eg.map(r => `<tr><td>${dateText(r.Fecha)}</td><td>${escapeHtml(r.Categoría || '')}</td><td>${escapeHtml(r.Subcategoría || '')}</td><td>${escapeHtml(r.Descripción || '')}</td><td>${escapeHtml(r.MedioPago || '')}</td><td class="num" style="color:#b85f3f;font-weight:600">${fmtMoney(r.Importe, r.Moneda)}</td><td><button class="btn btn-outline btn-sm" onclick="openMovimientoEdit(${r.__rowIndex})">Editar</button> <button class="btn btn-danger btn-sm" onclick="deleteMovimiento(${r.__rowIndex})">Eliminar</button></td></tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">Sin egresos este mes.</td></tr>'}</tbody></table></div></div>`;
 }
 
 // ── TAB: OTROS (DEUDAS / INVERSIONES / AHORRO) ───────────────────────────
@@ -2533,13 +2309,7 @@ function renderOtrosTab() {
 function closeModal() { $('#modalRoot').innerHTML = ''; }
 
 async function patchCells(sheet, updates) {
-  const key = keyFromSheetName(sheet);
-  const ws = key ? ensureSheetForKey(key) : (gastosWorkbook.Sheets[sheet] || (gastosWorkbook.SheetNames.push(sheet), gastosWorkbook.Sheets[sheet] = XLSX.utils.aoa_to_sheet([[]])));
-  for (const [addr, val] of updates) {
-    const parts = a1Parts(addr);
-    setCell(ws, parts.startRow, parts.startColNum, val);
-  }
-  await saveGastosWorkbook();
+  for (const [addr, val] of updates) await patchCell(sheet, addr, val);
 }
 function excelRowFromIndex(key, rowIndex) { return parseStartRow(raw[key].address) + Number(rowIndex); }
 async function addAporteToMeta(rowIndex, monto, fechaInput) {
@@ -2585,30 +2355,7 @@ function openDeudaModal(tipo='Por pagar', rowIndex=null) {
 function openSettleDebtModal(rowIndex) {
   const r=rows.deudas.find(x=>x.__rowIndex===rowIndex); if(!r) return; const isPay=r.Tipo==='Por pagar'; const cat=r.Categoría||'Préstamos / Deudas';
   $('#modalRoot').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this) closeModal()"><div class="modal"><h2>${isPay?'Pagar':'Cobrar'} deuda — ${escapeHtml(r.Contraparte)}</h2><form id="settleDebtForm"><div class="form-row"><div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${todayInputValue()}"></div><div class="form-group"><label>Monto</label><input type="number" step="0.01" name="monto" value="${r.Monto}" required></div></div><div class="form-row"><div class="form-group"><label>Categoría</label><select name="categoria" onchange="updateSubcatSelect(this)">${CATEGORIAS_GASTO.map(c=>`<option ${c===cat?'selected':''}>${c}</option>`).join('')}</select></div><div class="form-group"><label>Subcategoría</label><select name="subcategoria">${subcatOptions(cat,r.Subcategoría||'')}</select></div></div><div class="form-group"><label>Medio</label><select name="medio">${MEDIOS_PAGO_NO_TC.map(m=>`<option>${m}</option>`).join('')}</select></div><div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-success">Confirmar</button></div></form></div></div>`;
-  $('#settleDebtForm').addEventListener('submit', async ev => {
-    ev.preventDefault();
-    const fd = Object.fromEntries(new FormData(ev.target));
-    setStatus(isPay ? 'Marcando deuda como pagada...' : 'Marcando deuda como cobrada...', 'wait');
-    try {
-      const er = excelRowFromIndex('deudas', rowIndex);
-      const fecha = dateToExcelSerial(fd.fecha || todayInputValue());
-      await patchCells(SHEETS.deudas, [['H' + er, isPay ? 'Pagada' : 'Cobrada'], ['J' + er, fd.categoria], ['K' + er, fd.subcategoria || ''], ['L' + er, fecha], ['M' + er, fd.medio || 'Transferencia']]);
-      const cached = rows.deudas.find(x => Number(x.__rowIndex) === Number(rowIndex));
-      if (cached) Object.assign(cached, { Estado: isPay ? 'Pagada' : 'Cobrada', Categoría: fd.categoria, Subcategoría: fd.subcategoria || '', FechaPagoCobro: fecha, MedioPagoCobro: fd.medio || 'Transferencia' });
-      const d = new Date((fd.fecha || todayInputValue()) + 'T00:00:00');
-      try {
-        await addRow(TABLES.transacciones, [nextId(rows.transacciones), fecha, isPay ? 'Gasto' : 'Ingreso', isPay ? fd.categoria : 'Otros', (isPay ? 'Pago deuda ' : 'Cobro deuda ') + r.Contraparte, Number(fd.monto), r.Moneda || 'ARS', fd.medio || 'Transferencia', 'Desde panel de deudas', d.getMonth() + 1, d.getFullYear(), isPay ? (fd.subcategoria || '') : '']);
-      } catch (txErr) {
-        showError('Deuda marcada como ' + (isPay ? 'pagada' : 'cobrada') + ', pero no se creo el movimiento espejo: ' + txErr.message);
-      }
-      closeModal();
-      await loadAll();
-      setStatus(isPay ? 'OK Deuda marcada pagada' : 'OK Deuda marcada cobrada', 'ok');
-    } catch (e) {
-      showError('No se pudo confirmar deuda: ' + e.message);
-      setStatus('Error', 'err');
-    }
-  });
+  $('#settleDebtForm').addEventListener('submit', async ev=>{ev.preventDefault(); const fd=Object.fromEntries(new FormData(ev.target)); try{ const er=excelRowFromIndex('deudas',rowIndex); const fecha=dateToExcelSerial(fd.fecha||todayInputValue()); await patchCells(SHEETS.deudas,[['H'+er,isPay?'Pagada':'Cobrada'],['J'+er,fd.categoria],['K'+er,fd.subcategoria||''],['L'+er,fecha],['M'+er,fd.medio||'Transferencia']]); const d=new Date((fd.fecha||todayInputValue())+'T00:00:00'); await addRow(TABLES.transacciones,[nextId(rows.transacciones),fecha,isPay?'Gasto':'Ingreso',isPay?fd.categoria:'Otros', (isPay?'Pago deuda ':'Cobro deuda ')+r.Contraparte, Number(fd.monto), r.Moneda||'ARS', fd.medio||'Transferencia', 'Desde panel de deudas', d.getMonth()+1, d.getFullYear(), isPay?(fd.subcategoria||''):'']); closeModal(); await loadAll(); }catch(e){showError('No se pudo confirmar deuda: '+e.message);} });
 }
 function openInversionModal(rowIndex=null){ const r=rowIndex?rows.inversiones.find(x=>x.__rowIndex===rowIndex):null; $('#modalRoot').innerHTML=`<div class="modal-overlay" onclick="if(event.target===this) closeModal()"><div class="modal"><h2>${r?'Editar':'Agregar'} inversión</h2><form id="invForm"><div class="form-row"><div class="form-group"><label>Fecha</label><input type="date" name="fecha" value="${r?.FechaRegistro?new Date(excelDateToDate(r.FechaRegistro)).toISOString().slice(0,10):todayInputValue()}"></div><div class="form-group"><label>Tipo activo</label><select name="tipo"><option>Cripto</option><option>Acciones</option><option>Bonos</option><option>Plazo fijo</option><option>FCI</option></select></div></div><div class="form-row"><div class="form-group"><label>Ticker / nombre</label><input name="ticker" value="${escapeHtml(r?.Ticker||'')}" required></div><div class="form-group"><label>Moneda</label><select name="moneda"><option ${r?.Moneda==='ARS'?'selected':''}>ARS</option><option ${r?.Moneda==='USD'?'selected':''}>USD</option></select></div></div><div class="form-row-3"><div class="form-group"><label>Cantidad</label><input type="number" step="0.000001" name="cantidad" value="${r?.Cantidad||''}"></div><div class="form-group"><label>PPC</label><input type="number" step="0.01" name="ppc" value="${r?.PPC||''}"></div><div class="form-group"><label>Precio actual</label><input type="number" step="0.01" name="precio" value="${r?.PrecioActual||''}"></div></div><div class="form-group"><label>Notas</label><input name="notas" value="${escapeHtml(r?.Notas||'')}"></div><div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-success">Guardar</button></div></form></div></div>`; if(r){ $('#invForm [name="tipo"]').value=r.TipoActivo||'Acciones'; } $('#invForm').addEventListener('submit', async ev=>{ev.preventDefault(); const fd=Object.fromEntries(new FormData(ev.target)); const cant=Number(fd.cantidad||0), ppc=Number(fd.ppc||0), precio=Number(fd.precio||0); const gan=(precio-ppc)*cant; const ten=precio*cant; try{ if(r){ const er=excelRowFromIndex('inversiones',rowIndex); await patchCells(SHEETS.inversiones,[['B'+er,dateToExcelSerial(fd.fecha||todayInputValue())],['D'+er,fd.tipo],['E'+er,fd.ticker],['F'+er,cant],['G'+er,ppc],['H'+er,precio],['I'+er,gan],['J'+er,ten],['K'+er,fd.moneda],['L'+er,fd.notas||''],['M'+er,'Activa']]); } else { await addRow(TABLES.inversiones,[nextId(rows.inversiones),dateToExcelSerial(fd.fecha||todayInputValue()),'Sin definir',fd.tipo,fd.ticker,cant,ppc,precio,gan,ten,fd.moneda,fd.notas||'','Activa']); } closeModal(); await loadAll(); }catch(e){showError('No se pudo guardar inversión: '+e.message);} }); }
 async function deleteInversion(rowIndex){ if(!confirm('¿Eliminar inversión? No se borra la fila histórica, se marca como Eliminada.')) return; try{ const er=excelRowFromIndex('inversiones',rowIndex); await patchCell(SHEETS.inversiones,'M'+er,'Eliminada'); await loadAll(); }catch(e){showError('No se pudo eliminar inversión: '+e.message);} }
@@ -2786,11 +2533,7 @@ function openSimpleModal(kind, medioInicial) {
           <div class="form-group"><label>Descripción</label><input type="text" name="descripcion" placeholder="Ej: Mueble, Pago resumen BBVA, Aporte viaje"></div>
           <div class="form-row">
             <div class="form-group"><label>Importe</label><input type="number" name="importe" step="0.01" required></div>
-            <div class="form-group"><label>Moneda</label><select name="moneda" onchange="toggleCotizacion(this)"><option>ARS</option><option>USD</option></select></div>
-          </div>
-          <div class="form-row" id="cotizGroup" style="display:none">
-            <div class="form-group"><label>Cotización (ARS por USD)</label><input type="number" name="cotizacion" step="0.01" placeholder="Ej: 1190"></div>
-            <div class="form-group"><label>Pesos efectivamente gastados</label><div id="cotizCalc" style="padding:9px 13px;border-radius:var(--radius-sm);background:var(--surface2);font-family:'DM Serif Display';font-size:18px;color:var(--text-soft)">$ —</div></div>
+            <div class="form-group"><label>Moneda</label><select name="moneda"><option>ARS</option><option>USD</option></select></div>
           </div>
           <div class="form-group"><label>Notas (opcional)</label><input type="text" name="notas"></div>
           <div class="modal-actions"><button type="button" class="btn btn-outline" onclick="closeModal()">Cancelar</button><button type="submit" class="btn btn-success">Guardar</button></div>
@@ -2798,54 +2541,12 @@ function openSimpleModal(kind, medioInicial) {
       </div>
     </div>`;
   updateSubcatSelect($('#txFormNew [name="categoria"]'));
-  // Cotizacion: mostrar/ocultar y recalcular pesos efectivos en tiempo real.
-  const monedaEl = $('#txFormNew [name="moneda"]');
-  const cotizEl = $('#txFormNew [name="cotizacion"]');
-  const importeEl = $('#txFormNew [name="importe"]');
-  const cotizGroup = document.getElementById('cotizGroup');
-  const cotizCalc = document.getElementById('cotizCalc');
-  function refreshCotiz() {
-    const isUsd = monedaEl.value === 'USD';
-    cotizGroup.style.display = isUsd ? '' : 'none';
-    if (isUsd) {
-      const c = Number(cotizEl?.value || 0);
-      const imp = Number(importeEl?.value || 0);
-      cotizCalc.textContent = c > 0 && imp > 0 ? fmtARS(c * imp) : '$ —';
-    }
-  }
-  monedaEl.addEventListener('change', refreshCotiz);
-  cotizEl?.addEventListener('input', refreshCotiz);
-  importeEl?.addEventListener('input', refreshCotiz);
-
   $('#txFormNew').addEventListener('submit', async e => {
     e.preventDefault();
     const fd = Object.fromEntries(new FormData(e.target));
     const d = new Date(fd.fecha + 'T00:00:00');
     const desc = fd.descripcion || (fd.categoria === 'Pago tarjeta de crédito' && fd.tarjeta ? ('Pago resumen ' + fd.tarjeta) : (fd.categoria === 'Ahorro / Inversiones' ? 'Aporte ahorro / inversión' : ''));
-    // Si la moneda es USD y se ingreso cotizacion, registramos DOS filas: una en
-    // pesos (lo que efectivamente salio de la cuenta) y otra USD informativa via
-    // notas — asi el egreso del mes queda en ARS y el resumen de ahorros queda
-    // bien (no contamos "100 ARS" cuando en realidad fueron "100 USD comprados").
-    let row, extraNotaMov, extraRowsAhorro = null;
-    if (fd.moneda === 'USD' && Number(fd.cotizacion || 0) > 0 && kind === 'Gasto') {
-      const usdCount = Number(fd.importe || 0);
-      const cotiz = Number(fd.cotizacion);
-      const arsSpent = usdCount * cotiz;
-      extraNotaMov = `Compra USD ${usdCount} @ ${fmtARS(cotiz)}/USD. ${fd.notas || ''}`.trim();
-      row = [nextId(rows.transacciones), dateToExcelSerial(fd.fecha), kind, fd.categoria, desc || `Compra USD ${usdCount}`, arsSpent, 'ARS', fd.medio, extraNotaMov, d.getMonth() + 1, d.getFullYear(), fd.subcategoria || 'Dólares / moneda extranjera'];
-      // Si NO hay meta especifica, igualmente registramos un aporte USD a una
-      // meta virtual "Dolares" (creandola al vuelo si no existe).
-      if (!fd.metaAhorro && fd.categoria === 'Ahorro / Inversiones') {
-        const existing = (rows.ahorro || []).find(r => fixedKey(r.Meta) === fixedKey('Dolares ahorrados') && String(r.Moneda || '').toUpperCase() === 'USD');
-        if (existing) {
-          extraRowsAhorro = { rowIndex: existing.__rowIndex, usdCount };
-        } else {
-          extraRowsAhorro = { newMeta: true, usdCount };
-        }
-      }
-    } else {
-      row = [nextId(rows.transacciones), dateToExcelSerial(fd.fecha), kind, fd.categoria, desc, Number(fd.importe), fd.moneda, fd.medio, fd.notas || '', d.getMonth() + 1, d.getFullYear(), fd.subcategoria || ''];
-    }
+    const row = [nextId(rows.transacciones), dateToExcelSerial(fd.fecha), kind, fd.categoria, desc, Number(fd.importe), fd.moneda, fd.medio, fd.notas || '', d.getMonth() + 1, d.getFullYear(), fd.subcategoria || ''];
     setStatus('Guardando…', 'wait');
     try {
       await addRow(TABLES.transacciones, row);
@@ -2855,19 +2556,10 @@ function openSimpleModal(kind, medioInicial) {
       if (kind === 'Gasto' && fd.categoria === 'Ahorro / Inversiones' && fd.metaAhorro) {
         await addAporteToMeta(Number(fd.metaAhorro), Number(fd.importe), fd.fecha);
       }
-      // Crear o actualizar meta "Dolares ahorrados" para acumulacion USD sin meta especifica.
-      if (extraRowsAhorro) {
-        if (extraRowsAhorro.newMeta) {
-          await addRow(TABLES.ahorro, [nextId(rows.ahorro), 'Dolares ahorrados', 'USD', 0, '', dateToExcelSerial(fd.fecha), extraRowsAhorro.usdCount, 'En curso', 'Auto-creada desde compra USD', extraRowsAhorro.usdCount, 'SI']);
-        } else {
-          await addAporteToMeta(extraRowsAhorro.rowIndex, extraRowsAhorro.usdCount, fd.fecha);
-        }
-      }
       closeModal(); await loadAll();
     } catch (err) { showError('No se pudo guardar: ' + err.message); setStatus('Error', 'err'); }
   });
 }
-window.toggleCotizacion = function(sel) { const g = document.getElementById('cotizGroup'); if (g) g.style.display = sel.value === 'USD' ? '' : 'none'; };
 
 // ── MODAL: Compra con tarjeta ──
 function openTcModal() {
@@ -2933,8 +2625,6 @@ function openTcModal() {
   $('#tcFormNew').addEventListener('submit', async e => {
     e.preventDefault();
     const fd = Object.fromEntries(new FormData(e.target));
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando…'; }
     const idCompra = nextCompraId(fd.tarjeta);
     const cuotasN = Number(fd.cuotas);
     const total = Number(fd.importe);
@@ -2949,24 +2639,16 @@ function openTcModal() {
       fd.descripcion, fd.categoria || '', total, reintegro, neto, cuotasN, valor,
       months[0].serial, mesFin, cr, cr === 0 ? 'PAGADO' : 'PENDIENTE', 'ARS', fd.notas || '', fd.subcategoria || ''
     ];
-    setStatus(`Guardando compra y ${cuotasN} cuotas...`, 'wait');
+    setStatus('Guardando compra…', 'wait');
     try {
-      // BATCH: una sola subida al final, no N. Antes podia tardar 30s+ con muchas
-      // cuotas y el modal parecia colgado.
-      const adds = [{ table: TABLES.tarjetas, values: compra }];
+      await addRow(TABLES.tarjetas, compra);
+      // base id para cuotas
       let cuotaId = nextId(rows.cuotas);
       for (let i = 0; i < months.length; i++) {
-        adds.push({ table: TABLES.cuotas, values: [cuotaId++, idCompra, fd.tarjeta, fd.descripcion, i + 1, cuotasN, valor, months[i].serial, 'ARS', months[i].mes, months[i].año] });
+        await addRow(TABLES.cuotas, [cuotaId++, idCompra, fd.tarjeta, fd.descripcion, i + 1, cuotasN, valor, months[i].serial, 'ARS', months[i].mes, months[i].año]);
       }
-      await addRowsBatch(adds);
-      closeModal();
-      setStatus(`OK Compra guardada con ${cuotasN} cuotas`, 'ok');
-      await loadAll();
-    } catch (err) {
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar compra y cuotas'; }
-      showError('No se pudo guardar la compra: ' + err.message);
-      setStatus('Error', 'err');
-    }
+      closeModal(); await loadAll();
+    } catch (err) { showError('No se pudo guardar la compra: ' + err.message); setStatus('Error', 'err'); }
   });
 }
 
